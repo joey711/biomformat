@@ -22,8 +22,8 @@ x3 = read_biom(rich_dense_file)
 x4 = read_biom(rich_sparse_file)
 x5 = read_biom(rich_dense_char)
 x6 = read_biom(rich_sparse_char)
-x7 = read_biom(min_sparse_hdf5)
-x8 = read_biom(rich_sparse_hdf5)
+x7 = suppressWarnings(read_biom(min_sparse_hdf5))
+x8 = suppressWarnings(read_biom(rich_sparse_hdf5))
 
 
 # Test ncol, nrow, colnames, rownames

@@ -13,29 +13,31 @@ The design of this API is intended to match the python API where appropriate, wh
 
 # Installation
 
-To install the latest stable release of the biom package enter the following in an R session (after official release).
+To install the latest stable release of the biomformat package enter the following in an R session (after official release).
 
 ```S
 source("http://bioconductor.org/biocLite.R")
-biocLite("biom")
+biocLite("biomformat")
 ```
 
 Before official release, or to install the latest development version, enter the following into an R session.
 
 ```S
 install.packages("devtools") # if not already installed
-devtools::install_github("biomformat", "joey711")
+devtools::install_github("joey711/biomformat")
 ```
 
 # Support
 
- * Please post feature or support requests and bugs at the [Issues Tracker for the biomformat package](https://github.com/joey711/biomformat/issues) on GitHub. Issues related to the format itself and not the R interface should be posted on the [issues tracker for the biom format](https://github.com/biom-format/biom-format/issues).
+ * Please post feature or support requests and bugs at the [Issues Tracker for the biomformat package](https://github.com/joey711/biomformat/issues) on GitHub.
+ Issues related to the format itself and not the R interface should be posted on the [issues tracker for the biom-format team](https://github.com/biocore/biom-format/issues).
  
  * Note that this is a separate (but friendly!) project from the biom-format team, and the software license is different between this package and much of the rest of the biom-format software, which has switched to BSD.
 
- * The official release version of this package will be submitted to Bioconductor project, where [the rhdf5 package](http://bioconductor.org/packages/release/bioc/html/rhdf5.html) lives. Other than that, CRAN would be a suitable destination.
+ * This package is scheduled for inclusion in the next stable release of the Bioconductor project (BioC).
+ BioC is also where [the rhdf5 package](http://bioconductor.org/packages/release/bioc/html/rhdf5.html) lives.
 
  * The original release of this package was [made available through CRAN](http://cran.r-project.org/web/packages/biom/index.html), 
  as the "biom" package, supporting version 1.x (JSON) only.
- The current plan is to let "biom" remain on CRAN in maintenance-only mode until "biomformat" is released on Bioconductor. At which point "biom" will be considered deprecated.
+ The current plan is to let "biom" remain on CRAN in maintenance-only mode until "biomformat" is released on Bioconductor. At which point "biom" will be considered deprecated, and eventually removed.
 

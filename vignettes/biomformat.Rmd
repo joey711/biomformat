@@ -1,12 +1,37 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{BIOM support in R main vignette}
--->
-`r library("knitr")`
-`r opts_chunk$set(cache=TRUE, fig.width=9)`
-<link href="http://joey711.github.com/phyloseq/markdown.css" rel="stylesheet"></link>
+---
+title: "The biomformat package vignette"
+author: "Paul J. McMurdie"
+output: 
+  BiocStyle::html_document:
+    fig_height: 7
+    fig_width: 10
+    toc: yes
+    toc_depth: 2
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{The biomformat package Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
 
-# biomformat package for BIOM file format support in R
+`r library("knitr")`
+`r opts_chunk$set(cache=FALSE, fig.width=9, message=FALSE, warning=FALSE)`
+
+## Paul J. McMurdie & Joseph N. Paulson
+
+If you find *biomformat* and/or its tutorials useful, 
+please acknowledge and cite *biomformat* in your publications:
+
+Paul J. McMurdie and Joseph N Paulson (2015). *biomformat: An interface package for the BIOM file format.* R/Bioconductor package version 1.0.0. 
+
+
+## [phyloseq Home Page](https://github.com/joey711/biomformat/)
+
+phyloseq has many more utilities for interacting
+with this kind of data than are provided in this I/O-oriented package.
+
+
+## Motivation for the biomformat package
 
 This is an [R Markdown document](http://www.rstudio.com/ide/docs/r_markdown). Markdown is a simple formatting syntax for authoring web pages. Further details on [R markdown here](http://www.rstudio.com/ide/docs/r_markdown).
 
@@ -15,13 +40,14 @@ The BIOM file format (canonically pronounced "biome") is designed to be a genera
 This demo is designed to provide an overview of the biom package to get you started using it quickly. The biom package itself is intended to be a utility package that will be depended-upon by other packages in the future. It provides I/O functionality, and functions to make it easier to with data from biom-format files. It does not (and probably should not) provide statistical analysis functions. However, it does provide tools to access data from BIOM format files in ways that are extremely common in R (such as `"data.frame"`, `"matrix"`, and `"Matrix"` classes).
 
 **Package versions** at the time (`r date()`) of this build:
+
 ```{r packages}
 library("biomformat"); packageVersion("biomformat")
 ```
 
----
 
 # Read BIOM format
+
 Here is an example importing BIOM formats of different types into R using the `read_biom` function. The resulting data objects in R are given names beginning with `x`.
 
 ```{r read-biom-examples}
@@ -47,8 +73,6 @@ x1
 
 It would be hard to interpret and wasteful of RAM to stream all the data from a BIOM format file to the standard out when printed with `print` or `show` methods. Instead, a brief summary of the contents BIOM data is shown. 
 
-
----
 
 # Access BIOM data
 
@@ -104,8 +128,6 @@ boxplot(as(biom_data(x4), "vector"))
 heatmap(as(biom_data(x4), "matrix"))
 ```
 
-
----
 
 # Write BIOM format
 

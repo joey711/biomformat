@@ -66,6 +66,6 @@ test_that("imported biom files are S4", {
 })
 
 test_that("show method output tests",{
-	expect_output(x1, "biom object. \ntype:")
-	expect_output(x4, "biom object. \ntype:")
+	expect_output(print(x1), "biom object. \ntype:")
+	expect_output(print(x4), "biom object. \ntype:")
 })
