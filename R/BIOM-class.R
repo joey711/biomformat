@@ -184,7 +184,7 @@ make_biom <- function(data, sample_metadata=NULL, observation_metadata=NULL, id=
   # (Might eventually expose some of these list elements as function arguments)
   format_url = "http://biom-format.org"
   return(biom(list(id=id,
-                   format = "Biological Observation Matrix 1.0.0-dev",
+                   format = "Biological Observation Matrix 1.0.0",
                    format_url = format_url,
                    type = "OTU table",
                    generated_by = sprintf("biomformat %s", packageVersion("biomformat")),
