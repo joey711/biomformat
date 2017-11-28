@@ -781,42 +781,6 @@ extract_metadata = function(x, indextype, indices, parallel=FALSE){
 	return(metadata)
 }
 ################################################################################
-# Generic internal function for generating the count matrix.
-#' @keywords internal
-generate_matrix <- function(x){
-  indptr  = x$sample$matrix$indptr+1
-  indices = x$sample$matrix$indices+1
-  data    = x$sample$matrix$data
-  nr = length(x$observation$ids)
- 
-  counts = sapply(2:length(indptr),function(i){
-    x = rep(0,nr)
-    seq = indptr[i-1]:(indptr[i]-1)
-    x[indices[seq]] = data[seq]
-    x
-    })
-  rownames(counts) = x$observation$ids
-  colnames(counts) = x$sample$ids
-  # I wish this next line wasn't necessary
-  lapply(1:nrow(counts),function(i){
-    counts[i,]
-    })
-}
-################################################################################
-# Generic internal function for generating the metadata.
-#' @keywords internal
-generate_metadata <- function(x){
-  metadata = x$metadata
-  metadata = lapply(1:length(x$ids),function(i){
-      id_metadata = lapply(metadata,function(j){
-        if(length(dim(j))>1){ as.vector(j[,i,drop=FALSE]) }
-        else{ j[i] }
-          })
-      list(id = x$ids[i],metadata=id_metadata)
-    })
-  return(metadata)
-}
-################################################################################
 # Generic internal function for generating a named list. 
 #' @keywords internal
 namedList <- function(...) {
