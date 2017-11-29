@@ -34,7 +34,7 @@ VignetteBuilder:
 Collate:
     'allClasses.R'
     'allPackage.R'
-    'hdf5.R',
+    'hdf5.R'
     'IO-methods.R'
     'BIOM-class.R'
     'validity-methods.R'
