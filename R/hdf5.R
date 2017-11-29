@@ -232,7 +232,7 @@ biomTypes2.1 = c(
 #' 
 #' @export
 #' 
-biom_header_2.1 = function(
+generate_biom_header_2.1 = function(
   id = "",
   type = biomTypes2.1,
   format_url = "http://biom-format.org",
@@ -249,6 +249,7 @@ biom_header_2.1 = function(
     `creation-date` = as.character(creation_date)
   )
 }
+################################################################################
 # From:
 # http://biom-format.org/documentation/format_versions/biom-2.1.html
 #
@@ -292,7 +293,7 @@ biom_header_2.1 = function(
 # sample/matrix/data         : <float64> A (nnz,) dataset containing the actual matrix data
 # sample/matrix/indices      : <int32> A (nnz,) dataset containing the row indices (e.g., maps into observation/ids)
 # sample/matrix/indptr       : <int32> A (N+1,) dataset containing the compressed column offsets
-
+################################################################################
 #' The top-level attributes required according to biom-format 2.1 specification
 #' 
 #' See [the format definition](http://biom-format.org/documentation/format_versions/biom-2.1.html).
@@ -300,26 +301,114 @@ biom_header_2.1 = function(
 #' @export
 #' 
 requiredAttributes2.1 <-
-  c("id", "type", "format-url", "format-version", "generated-by", "creation-date", "shape", "nnz")
+  c("id", "type", "format-url", "format-version", "generated-by", 
+    "creation-date", "shape", "nnz")
 #' Convert matrix to biom-format 2.1 as an R list
 #' 
 #' See [The version 2.1 specification](http://biom-format.org/documentation/format_versions/biom-2.1.html)
 #' for more details.
 #' 
 #' @inheritParams access_sparse
-#' @param ... Additional named arguments passed to [biom_header_2.1()].
+#' @param ... Additional named arguments passed to [generate_biom_header_2.1()].
 #' 
 #' @seealso 
 #' 
-#' [biom_header_2.1()]
+#' [generate_biom_header_2.1()]
 #' 
 #' [matrix_to_biom_matlist()]
 #' 
 #' @export
 #' 
-matrix_to_biom_2.1_list = function(M, ...){
+matrix_to_biom_list_2.1 = function(M, ...){
   c(
-    biom_header_2.1(...),
+    generate_biom_header_2.1(...),
     matrix_to_biom_matlist(M)
   )
+}
+#' Add top-level attributes to a biom-file v2.1
+#' 
+#' @inheritParams write_biom_list_2.1
+#' @param biomFile An open and writable object of the [hdf5r][H5File-class]
+#'  (e.g. `H5File$new(File, mode="w")`).
+#'  Regular users of biomformat package should not define this directly,
+#'  but instead get it via constructor methods that also include
+#'  valid attributes and groups, e.g. [write_biom_list_2.1()].
+#' 
+#' @import hdf5r
+#' 
+add_biom_h5_attributes <- function(biomList, biomFile){
+  for(i in requiredAttributes2.1){
+    h5attr(biomFile, i) <- biomList[[i]]
+  }
+}
+#' Write biom-format version 2.1 to HDF5 file
+#' 
+#' @param biomList A list with structure/names that match the
+#'  biom-format version 2.1 structure.
+#'  For example, the output of [matrix_to_biom_list_2.1()].
+#'  
+#' @param File A character string indicating the destination file 
+#' 
+#' @return
+#' Invisible returns an object of the [H5File-class],
+#' after having used the same object to write to `File`.
+#' Note that the corresponding file will have been closed
+#' via the `$close_all()` method.
+#' 
+#' @export
+#' 
+#' @import hdf5r
+#' 
+write_biom_list_2.1 = function(biomList, File = "newFile.biom"){
+  # Open the biom-file and instantiate the file-mapping `H5File` object
+  biomFile <- H5File$new(File, mode="w")
+  # Enforce file-closing
+  on.exit({
+    biomFile$close_all()
+  })
+  # Add top-level attributes
+  add_biom_h5_attributes(biomList, biomFile)
+  # Add required groups
+  # Required top-level groups
+  biomFile$create_group("observation")
+  biomFile$create_group("sample")
+  # Required second-level groups
+  biomFile$create_group("observation/matrix")
+  biomFile$create_group("observation/metadata")
+  biomFile$create_group("observation/group-metadata")
+  biomFile$create_group("sample/matrix")
+  biomFile$create_group("sample/metadata")
+  biomFile$create_group("sample/group-metadata")
+  # Add observation (row) datasets
+  matrixDataSets = c("data", "indices", "indptr")
+  biomFile[["observation/ids"]] <- biomList$observation$ids
+  for(i in matrixDataSets){
+    biomFile[[paste0("observation/matrix/", i)]] <-
+      biomList$observation$matrix[[i]]
+  }
+  # Add sample (column) datasets
+  biomFile[["sample/ids"]] <- biomList$sample$ids
+  for(i in matrixDataSets){
+    biomFile[[paste0("sample/matrix/", i)]] <-
+      biomList$sample$matrix[[i]]
+  }
+  # Optionally add taxonomy if it is present.
+  if(length(biomList$observation$`group-metadata`$taxonomy) > 0){
+    taxPath = "observation/group-metadata/taxonomy"
+    biomFile[[taxPath]] <- biomList$observation$`group-metadata`$taxonomy
+  }
+  H5T_VLEN$new(h5types$H5T_NATIVE_INT)
+  H5T_VLEN$new(h5types$char)
+  # Optionally add phylogeny if it is present.
+  # From the biom-format v2.1 specification:
+  # "observation/group-metadata/phylogeny, 
+  # with the attribute observation/group-metadata/phylogeny.attrs['data_type'] = "newick", 
+  # which stores a single string with the newick format 
+  # of the phylogenetic tree for the observations."
+  if(length(biomList$observation$`group-metadata`$phylogeny) > 0){
+    phyloPath = "observation/group-metadata/phylogeny"
+    biomFile[[phyloPath]] <- biomList$observation$`group-metadata`$phylogeny
+    h5attr(biomFile[[phyloPath]], "data_type") <- "newick"
+  }
+  return(invisible(biomFile))
 }
