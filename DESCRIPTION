@@ -1,5 +1,5 @@
 Package: biomformat
-Version: 1.7.3
+Version: 1.7.4
 Date: 2017-11-28
 Maintainer: Paul J. McMurdie <joey711@gmail.com>
 License: GPL-2
@@ -43,4 +43,5 @@ biocViews:
     Metagenomics,
     Microbiome
 NeedsCompilation: no
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1

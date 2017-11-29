@@ -8,13 +8,13 @@ write_biom(x, biom_file)
 }
 \arguments{
 \item{x}{(Required). A biom object that is going to be written to file
-as a proper biom formatted file, adhering to 
+as a proper biom formatted file, adhering to
 \href{http://biom-format.org/documentation/biom_format.html}{the biom-format definition}.}
 
-\item{biom_file}{(Required). A character string indicating the 
+\item{biom_file}{(Required). A character string indicating the
 file location of the biom formatted file. This is a JSON formatted file
-specific to biological datasets. 
-The format is formally defined at 
+specific to biological datasets.
+The format is formally defined at
 \href{http://biom-format.org/documentation/biom_format.html}{the biom-format definition}}
 }
 \value{
@@ -39,7 +39,7 @@ Function to create a biom object from R data,
 \code{\link{make_biom}}.
 
 Definition of the
-\code{\link{biom-class}}. 
+\code{\link{biom-class}}.
 
 The \code{\link{read_biom}} import function.
 

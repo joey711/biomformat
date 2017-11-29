@@ -16,8 +16,8 @@ biom_shape(x)
 }
 \value{
 A length two \code{\link{integer-class}} vector
- indicating the \code{\link{nrow}} and \code{\link{ncol}} 
- of the main data matrix stored in \code{x}.
+indicating the \code{\link{nrow}} and \code{\link{ncol}}
+of the main data matrix stored in \code{x}.
 }
 \description{
 The matrix dimensions

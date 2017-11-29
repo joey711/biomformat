@@ -23,7 +23,7 @@ observation_metadata(x, rows, parallel = FALSE)
 returned object. For large datasets, specifying the row subset here,
 -- rather than first creating the complete data object --
 can improve speed/efficiency.
-This parameter can be vector of index numbers (\code{\link{numeric-class}}) or 
+This parameter can be vector of index numbers (\code{\link{numeric-class}}) or
 index names (\code{\link{character-class}}).}
 
 \item{parallel}{(Optional). Logical. Whether to perform the accession parsing
@@ -31,10 +31,10 @@ using a parallel-computing backend supported by the \code{\link{plyr-package}}
 via the \code{\link[foreach]{foreach-package}}.}
 }
 \value{
-A \code{\link{data.frame}} or \code{\link{list}} containing 
- the meta data, with index names. The precise form of the object returned
- depends on the metadata stored in \code{x}. A \code{data.frame} is
- created if possible.
+A \code{\link{data.frame}} or \code{\link{list}} containing
+the meta data, with index names. The precise form of the object returned
+depends on the metadata stored in \code{x}. A \code{data.frame} is
+created if possible.
 }
 \description{
 Retrieve and organize meta data from \code{\link{biom-class}},

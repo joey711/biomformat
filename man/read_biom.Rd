@@ -7,9 +7,9 @@
 read_biom(biom_file)
 }
 \arguments{
-\item{biom_file}{(Required). A character string indicating the 
+\item{biom_file}{(Required). A character string indicating the
 file location of the biom formatted file. This is a HDF5 or JSON formatted file
-specific to biological datasets. 
+specific to biological datasets.
 The format is formally defined at \href{http://biom-format.org/documentation/biom_format.html}{the biom-format definition}
 and depends on the versioning.}
 }
@@ -18,18 +18,18 @@ An instance of the \code{biom-class}.
 }
 \description{
 Import the data from a biom-format file into R, represented as an instance
-of the \code{\link{biom-class}}; essentially a \code{\link{list}} with 
+of the \code{\link{biom-class}}; essentially a \code{\link{list}} with
 special constraints that map to \href{http://biom-format.org/documentation/biom_format.html}{the biom-format definition}.
 }
 \details{
 The BIOM file format (canonically pronounced biome) is designed to be a general-use format for representing biological sample by observation contingency tables. BIOM is a recognized standard for the \href{http://www.earthmicrobiome.org/}{Earth Microbiome Project} and is a \href{http://gensc.org/}{Genomics Standards Consortium} candidate project. Please see \href{http://biom-format.org/}{the biom-format home page} for more details.
 
-It is tempting to include an argument identifying the 
+It is tempting to include an argument identifying the
 biom-format version number of the data file being imported.
 However, the biom-format version number is a required
-field in the biom-format definition. 
+field in the biom-format definition.
 Rather than duplicate this formal specification
-and allow the possibility of a conflict, the version 
+and allow the possibility of a conflict, the version
 number of the biom format will be referred to only by
 the "format" field in the biom formatted data,
 or its representation in R.
@@ -57,7 +57,7 @@ Function to create a biom object from R data,
 \code{\link{make_biom}}.
 
 Definition of the
-\code{\link{biom-class}}. 
+\code{\link{biom-class}}.
 
 Function to write a biom format file from a biom object,
 \code{\link{write_biom}}

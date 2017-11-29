@@ -13,7 +13,7 @@ biom_header_2.1(id = "", type = biomTypes2.1,
 \arguments{
 \item{id}{Optional table identifier string.}
 
-\item{type}{String indicating the table type, from a controlled vocabulary, [`biomTypes2.1`].}
+\item{type}{String indicating the table type, from a controlled vocabulary, \code{\link{biomTypes2.1}}.}
 
 \item{format_url}{The URL string for the biom-format project.}
 
@@ -24,7 +24,7 @@ biom_header_2.1(id = "", type = biomTypes2.1,
 \item{creation_date}{The date the file was built, in ISO 8601 format.}
 }
 \description{
-See [the format definition](http://biom-format.org/documentation/format_versions/biom-2.1.html).
+See \href{http://biom-format.org/documentation/format_versions/biom-2.1.html}{the format definition}.
 Note that this excludes the two matrix-dependent top-level attributes,
-`shape` and `nnz`.
+\code{shape} and \code{nnz}.
 }

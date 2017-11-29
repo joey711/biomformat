@@ -8,7 +8,7 @@ read_hdf5_biom(biom_file)
 }
 \arguments{
 \item{biom_file}{(Required). A biom object that is going to be written to file
-as a proper biom formatted file, adhering to 
+as a proper biom formatted file, adhering to
 \href{http://biom-format.org/documentation/biom_format.html}{the biom-format definition}.}
 }
 \value{
@@ -16,7 +16,7 @@ Nothing. The first argument, \code{x}, is written to a file.
 }
 \description{
 This function is meant only to be used if the user knows the file is
-a particular version / hdf5 format. Otherwise, the `read_biom` file should be used.
+a particular version / hdf5 format. Otherwise, the \code{read_biom} file should be used.
 }
 \examples{
 biom_file <- system.file("extdata", "rich_sparse_otu_table_hdf5.biom", package = "biomformat")
@@ -37,7 +37,7 @@ Function to create a biom object from R data,
 \code{\link{make_biom}}.
 
 Definition of the
-\code{\link{biom-class}}. 
+\code{\link{biom-class}}.
 
 The \code{\link{read_hdf5_biom}} import function.
 

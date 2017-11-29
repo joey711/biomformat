@@ -11,10 +11,10 @@ biom(x)
 \S4method{biom}{list}(x)
 }
 \arguments{
-\item{x}{(REQUIRED). A named list conforming to conventions arising from 
-the \code{\link{fromJSON}} function reading a biom-format file with 
+\item{x}{(REQUIRED). A named list conforming to conventions arising from
+the \code{\link{fromJSON}} function reading a biom-format file with
 default settings. See \code{\link{read_biom}} for more details about
-data import and 
+data import and
 \code{\link{biom-class}} for more details about accessor functions
 that extract R-friendly
 subsets of the data and metadata stored in \code{x}.}
@@ -24,15 +24,15 @@ An instance of the \code{\link{biom-class}}.
 }
 \description{
 This is for instantiating a biom object within R (\code{\link{biom-class}}),
-and assumes relevant data is already available in R. 
+and assumes relevant data is already available in R.
 This is different than reading a biom file into R.
 If you are instead interested in importing a biom file into R,
-you should use the \code{\link{read_biom}} function. 
-This function is made available (exported) so that 
+you should use the \code{\link{read_biom}} function.
+This function is made available (exported) so that
 advanced-users/developers
 can easily represent analogous data in this structure if needed.
 However, most users are expected to instead rely on the
-\code{\link{read_biom}} function for data import, followed by 
+\code{\link{read_biom}} function for data import, followed by
 accessor functions that extract R-friendly
 subsets of the data stored in the biom-format derived list.
 }
@@ -61,7 +61,7 @@ Function to create a biom object from R data,
 \code{\link{make_biom}}.
 
 Definition of the
-\code{\link{biom-class}}. 
+\code{\link{biom-class}}.
 
 The \code{\link{read_biom}} import function.
 

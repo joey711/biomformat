@@ -15,8 +15,8 @@ matrix_element_type(x)
 \item{x}{(Required). An instance of the \code{\link{biom-class}}.}
 }
 \value{
-A \code{\link{character-class}} string indicating 
-the class of the data stored in the main observation matrix of \code{x}, 
+A \code{\link{character-class}} string indicating
+the class of the data stored in the main observation matrix of \code{x},
 with expected values \code{"int"}, \code{"float"}, \code{"unicode"}.
 }
 \description{

@@ -7,11 +7,11 @@
 matrix_to_biom_csc(m)
 }
 \arguments{
-\item{m}{A base [matrix].}
+\item{m}{A base \link{matrix}.}
 }
 \description{
 Transform matrix to biom-format list representation of Compressed Sparse Column matrix
 }
 \seealso{
-A [python doc on CSC](http://www.scipy-lectures.org/advanced/scipy_sparse/csc_matrix.html)
+A \href{http://www.scipy-lectures.org/advanced/scipy_sparse/csc_matrix.html}{python doc on CSC}
 }

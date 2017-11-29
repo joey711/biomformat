@@ -32,14 +32,14 @@ biom_data(x, rows, columns, parallel = FALSE)
 returned object. For large datasets, specifying the row subset here,
 rather than after creating the whole matrix first,
 can improve speed/efficiency.
-Can be vector of index numbers (\code{\link{numeric-class}}) or 
+Can be vector of index numbers (\code{\link{numeric-class}}) or
 index names (\code{\link{character-class}}).}
 
 \item{columns}{(Optional). The subset of column indices described in the
 returned object. For large datasets, specifying the column subset here,
 rather than after creating the whole matrix first,
 can improve speed/efficiency.
-Can be vector of index numbers (\code{\link{numeric-class}}) or 
+Can be vector of index numbers (\code{\link{numeric-class}}) or
 index names (\code{\link{character-class}}).}
 
 \item{parallel}{(Optional). Logical. Whether to perform the accession parsing
@@ -48,13 +48,13 @@ via the \code{\link[foreach]{foreach-package}}. Note: At the moment, the header
 accessor does not need nor does it support parallel-computed parsing.
 
 @return A matrix containing the main observation data, with index names.
- The type of data (numeric or character) 
- will depend on the results of \code{\link{matrix_element_type}(x)}.
- The class of the matrix returned will depend on the sparsity of the data,
- and whether it has numeric or character data.
- For now, only numeric data can be stored in a \code{\link{Matrix-class}},
- which will be stored sparsely, if possible.
- Character data will be returned as a vanilla \code{\link{matrix-class}}.}
+The type of data (numeric or character)
+will depend on the results of \code{\link{matrix_element_type}(x)}.
+The class of the matrix returned will depend on the sparsity of the data,
+and whether it has numeric or character data.
+For now, only numeric data can be stored in a \code{\link{Matrix-class}},
+which will be stored sparsely, if possible.
+Character data will be returned as a vanilla \code{\link{matrix-class}}.}
 }
 \description{
 Retrieve and organize main data from \code{\link{biom-class}},

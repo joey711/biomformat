@@ -15,8 +15,8 @@ header(x)
 }
 \value{
 A list containing the header data.
- That is, all the required elements that are not
- the main data or index metadata.
+That is, all the required elements that are not
+the main data or index metadata.
 }
 \description{
 Extract the header from a \code{\link{biom-class}} object as a list.

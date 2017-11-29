@@ -13,7 +13,7 @@ for \code{\link{biom-class}} objects.}
 }
 \value{
 The number of columns in \code{x}.
- A length 1 \code{\link{integer-class}}.
+A length 1 \code{\link{integer-class}}.
 }
 \description{
 See the general documentation of \code{\link[base]{colnames}} method for

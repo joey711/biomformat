@@ -273,3 +273,26 @@ biom_header_2.1 = function(
 # sample/matrix/data         : <float64> A (nnz,) dataset containing the actual matrix data
 # sample/matrix/indices      : <int32> A (nnz,) dataset containing the row indices (e.g., maps into observation/ids)
 # sample/matrix/indptr       : <int32> A (N+1,) dataset containing the compressed column offsets
+
+#' Convert matrix to biom-format 2.1 as an R list
+#' 
+#' See [The version 2.1 specification](http://biom-format.org/documentation/format_versions/biom-2.1.html)
+#' for more details.
+#' 
+#' @inheritParams access_sparse
+#' @param ... Additional named arguments passed to [biom_header_2.1()].
+#' 
+#' @seealso 
+#' 
+#' [biom_header_2.1()]
+#' 
+#' [matrix_to_biom_matlist()]
+#' 
+#' @export
+#' 
+matrix_to_biom_2.1_list = function(M, ...){
+  c(
+    biom_header_2.1(...),
+    matrix_to_biom_matlist(M)
+  )
+}

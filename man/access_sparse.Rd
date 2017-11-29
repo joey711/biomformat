@@ -16,20 +16,20 @@ sparse_indices(M)
 sparse_data(M)
 }
 \arguments{
-\item{M}{A [matrix], or matrix-like coercible to [Matrix::CsparseMatrix-class].}
+\item{M}{A \link{matrix}, or matrix-like coercible to \link[Matrix:CsparseMatrix-class]{Matrix::CsparseMatrix}.}
 
-\item{slotName}{The name ([chracter]) of the CsparseMatrix slot.}
+\item{slotName}{The name (\link{chracter}) of the CsparseMatrix slot.}
 }
 \value{
 The values corresponding to the indicated compressed sparse column feature.
 }
 \description{
-This relies heavily on the compressed sparse format 
-defined in the [Matrix::Matrix] package [Matrix::CsparseMatrix-class].
+This relies heavily on the compressed sparse format
+defined in the \link[Matrix:Matrix]{Matrix::Matrix} package \link[Matrix:CsparseMatrix-class]{Matrix::CsparseMatrix}.
 }
 \details{
 See a
-[python doc on CSC](http://www.scipy-lectures.org/advanced/scipy_sparse/csc_matrix.html)
+\href{http://www.scipy-lectures.org/advanced/scipy_sparse/csc_matrix.html}{python doc on CSC}
 }
 \section{Functions}{
 \itemize{

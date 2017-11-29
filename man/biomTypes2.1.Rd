@@ -3,12 +3,12 @@
 \docType{data}
 \name{biomTypes2.1}
 \alias{biomTypes2.1}
-\title{Acceptable values for biom v2.1 top-level `type`}
+\title{Acceptable values for biom v2.1 top-level \code{type}}
 \format{An object of class \code{character} of length 7.}
 \usage{
 biomTypes2.1
 }
 \description{
-Acceptable values for biom v2.1 top-level `type`
+Acceptable values for biom v2.1 top-level \code{type}
 }
 \keyword{datasets}
