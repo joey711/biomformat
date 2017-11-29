@@ -174,6 +174,9 @@ matrix_to_biom_csc = function(m){
 #' @param m The matrix that you want to coerce to a biom-like list.
 #' 
 #' @importClassesFrom Matrix CsparseMatrix
+#' @importFrom Matrix t
+#' 
+#' @export
 #' 
 matrix_to_biom_matlist = function(m){
   # Coerce up-front to avoid repeating coercion at each step
