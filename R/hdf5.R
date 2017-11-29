@@ -252,6 +252,25 @@ biom_header_2.1 = function(
 # From:
 # http://biom-format.org/documentation/format_versions/biom-2.1.html
 #
+# Required top-level attributes:
+#   
+# id                   : <string or null> a field that can be used to id a table (or null)
+# type                 : <string> Table type (a controlled vocabulary)
+# Acceptable values:
+#   "OTU table"
+# "Pathway table"
+# "Function table"
+# "Ortholog table"
+# "Gene table"
+# "Metabolite table"
+# "Taxon table"
+# format-url           : <url> A string with a static URL providing format details
+# format-version       : <tuple> The version of the current biom format, major and minor
+# generated-by         : <string> Package and revision that built the table
+# creation-date        : <datetime> Date the table was built (ISO 8601 format)
+# shape                : <list of ints>, the number of rows and number of columns in data
+# nnz                  : <int> The number of non-zero elements in the table
+# 
 # Required groups:
 #
 # observation/               : The HDF5 group that contains observation specific information and an observation oriented view of the data
@@ -274,6 +293,14 @@ biom_header_2.1 = function(
 # sample/matrix/indices      : <int32> A (nnz,) dataset containing the row indices (e.g., maps into observation/ids)
 # sample/matrix/indptr       : <int32> A (N+1,) dataset containing the compressed column offsets
 
+#' The top-level attributes required according to biom-format 2.1 specification
+#' 
+#' See [the format definition](http://biom-format.org/documentation/format_versions/biom-2.1.html).
+#' 
+#' @export
+#' 
+requiredAttributes2.1 <-
+  c("id", "type", "format-url", "format-version", "generated-by", "creation-date", "shape", "nnz")
 #' Convert matrix to biom-format 2.1 as an R list
 #' 
 #' See [The version 2.1 specification](http://biom-format.org/documentation/format_versions/biom-2.1.html)
