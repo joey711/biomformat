@@ -510,7 +510,7 @@ setMethod("biom_data", c("biom", "missing", "numeric"), function(x, rows, column
   biom_data(x, 1:nrow(x), columns, parallel)
 })
 #' @rdname biom_data-methods
-#' @import Matrix
+#' @importFrom Matrix Matrix
 #' @importFrom plyr d_ply
 #' @importFrom plyr ldply
 #' @importFrom plyr laply

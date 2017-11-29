@@ -1,5 +1,5 @@
 Package: biomformat
-Version: 1.7.1
+Version: 1.7.2
 Date: 2017-11-28
 Maintainer: Paul J. McMurdie <joey711@gmail.com>
 License: GPL-2
@@ -19,7 +19,7 @@ Description: This is an R package for interfacing with the BIOM format.
 Imports:
     plyr (>= 1.8),
     jsonlite (>= 0.9.16),
-    Matrix (>= 1.2),
+    Matrix (>= 1.2.11),
     rhdf5
 Depends:
     R (>= 3.2),
@@ -34,6 +34,7 @@ VignetteBuilder:
 Collate:
     'allClasses.R'
     'allPackage.R'
+    'hdf5.R',
     'IO-methods.R'
     'BIOM-class.R'
     'validity-methods.R'
@@ -42,3 +43,4 @@ biocViews:
     Metagenomics,
     Microbiome
 NeedsCompilation: no
+RoxygenNote: 6.0.1

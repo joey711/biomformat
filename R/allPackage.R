@@ -1,5 +1,5 @@
 ###############################################
-#'  This is an R package for interfacing with the biom format.
+#' This is an R package for interfacing with the biom format.
 #'
 #' This is an R package for interfacing with the biom-format.
 #' It includes basic utilities for reading and writing BIOM format using R,
@@ -9,7 +9,7 @@
 #'
 #' @import methods
 #' @name biom-package
-#' @author Paul J. McMurdie II \email{mcmurdie@@stanford.edu}
+#' @author Paul J. McMurdie II \email{joey711@@gmail.com}
 #' @references
 #'  \url{http://www.biom-format.org/}
 #'  
