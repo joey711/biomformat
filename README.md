@@ -16,8 +16,9 @@ The design of this API is intended to match the python API where appropriate, wh
 To install the latest stable release of the biomformat package enter the following in an R session (after official release).
 
 ```S
-source("http://bioconductor.org/biocLite.R")
-biocLite("biomformat")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("biomformat")
 ```
 
 Before official release, or to install the latest development version, enter the following into an R session.
