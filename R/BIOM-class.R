@@ -572,21 +572,19 @@ setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, column
     m = m[rows, columns]
   # End sparse section
   }   
-  # Add row and column names
+  # If either dimension is length-one
   if( identical(length(rows), 1L) | identical(length(columns), 1L) ){
-    # If either dimension is length-one
-    # Try naming by colnames first, then rownames
     if( identical(length(rows), 1L) ){
-      names(m) <- sapply(x$columns[columns], function(i) i$id )
+      # If row is length-one (1 taxon)
+      m = t(as.matrix(m))
     } else {
-      names(m) <- sapply(x$rows[rows], function(i) i$id )
+      # If column is length-one (1 sample)
+      m = as.matrix(m)
     }
-  } else {
-    # Else, both dimensions are longer than 1,
-    # can assume is a matrix and assign names to both dimensions
-    rownames(m) <- sapply(x$rows[rows], function(i) i$id )
-    colnames(m) <- sapply(x$columns[columns], function(i) i$id )
   }
+  # Add row and column names
+  rownames(m) <- sapply(x$rows[rows], function(i) i$id )
+  colnames(m) <- sapply(x$columns[columns], function(i) i$id )
   return(m)
 })
 ################################################################################
