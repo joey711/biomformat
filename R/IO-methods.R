@@ -121,7 +121,7 @@ read_biom <- function(biom_file){
 #' y = read_biom(outfile)
 #' identical(x, y) 
 write_biom <- function(x, biom_file){
-	cat(toJSON(x, always_decimal=TRUE, auto_unbox=TRUE), file=biom_file)
+	cat(toJSON(x, always_decimal=TRUE, auto_unbox=TRUE, pretty=TRUE), file=biom_file)
 }
 ################################################################################
 #' Read in a biom-format vs 2 file, returning a \code{list}.

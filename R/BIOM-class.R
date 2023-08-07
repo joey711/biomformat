@@ -165,15 +165,19 @@ setMethod("biom", c("list"), function(x){
 make_biom <- function(data, sample_metadata=NULL, observation_metadata=NULL, id=NULL, matrix_element_type="int"){
   # The observations / features / OTUs / rows "meta" data table
   if(!is.null(observation_metadata)){
+    observation_metadata = as.data.frame(observation_metadata)
+    colnames(observation_metadata) = NULL
     rows = mapply(list, SIMPLIFY=FALSE, id=as.list(rownames(data)),
-                  metadata=alply(as.matrix(observation_metadata), 1, .expand=FALSE, .dims=TRUE))
+                  metadata=alply(as.matrix(observation_metadata), 1, function(x) list(taxonomy = x),
+				 .expand=FALSE, .dims=TRUE))
   } else {
     rows = mapply(list, id=as.list(rownames(data)), metadata=NA, SIMPLIFY=FALSE)
   }
   # The samples / sites / columns "meta" data table
   if(!is.null(sample_metadata)){
     columns = mapply(list, SIMPLIFY=FALSE, id=as.list(colnames(data)),
-                     metadata=alply(as.matrix(sample_metadata), 1, .expand=FALSE, .dims=TRUE)) 
+                     metadata=alply(as.matrix(sample_metadata), 1, function(x) data.frame(t(x)),
+				    .expand=FALSE, .dims=TRUE)) 
   } else {
     columns = mapply(list, id=as.list(colnames(data)), metadata=NA, SIMPLIFY=FALSE)
   }
