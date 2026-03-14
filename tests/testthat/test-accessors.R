@@ -127,35 +127,42 @@ test_that("Test pre-access biom_data subsetting", {
   expect_equal(T8[1:3, 3:6], biom_data(x8, 1:3, 3:6), label=label)
 
   label = "single row and column (single value)"
-  expect_equivalent(T1[3, 4], biom_data(x1, 3, 4), label=label)
-  expect_equivalent(T2[3, 4], biom_data(x2, 3, 4), label=label)
-  expect_equivalent(T3[3, 4], biom_data(x3, 3, 4), label=label)
-  expect_equivalent(T4[3, 4], biom_data(x4, 3, 4), label=label)
-  expect_equivalent(T5[3, 4], biom_data(x5, 3, 4), label=label)
-  expect_equivalent(T6[3, 4], biom_data(x6, 3, 4), label=label)
-  expect_equivalent(T7[3, 4], biom_data(x7, 3, 4), label=label)
-  expect_equivalent(T8[3, 4], biom_data(x8, 3, 4), label=label)
+  # biom_data() with scalar row+col now returns a 1x1 Matrix (drop=FALSE fix).
+  # Compare the numeric value, ignoring the matrix wrapper.
+  expect_equal(T1[3, 4], as.numeric(biom_data(x1, 3, 4)), label=label)
+  expect_equal(T2[3, 4], as.numeric(biom_data(x2, 3, 4)), label=label)
+  expect_equal(T3[3, 4], as.numeric(biom_data(x3, 3, 4)), label=label)
+  expect_equal(T4[3, 4], as.numeric(biom_data(x4, 3, 4)), label=label)
+  expect_equal(T5[3, 4], as.vector(biom_data(x5, 3, 4))[1], label=label)
+  expect_equal(T6[3, 4], as.vector(biom_data(x6, 3, 4))[1], label=label)
+  expect_equal(T7[3, 4], as.numeric(biom_data(x7, 3, 4)), label=label)
+  expect_equal(T8[3, 4], as.numeric(biom_data(x8, 3, 4)), label=label)
 
 
   label = "single rows and multiple cols"
-  expect_equal(T1[1, 3:6], biom_data(x1, 1, 3:6), label=label)
-  expect_equal(T2[1, 3:6], biom_data(x2, 1, 3:6), label=label)
-  expect_equal(T3[1, 3:6], biom_data(x3, 1, 3:6), label=label)
-  expect_equal(T4[1, 3:6], biom_data(x4, 1, 3:6), label=label)
-  expect_equal(T5[1, 3:6], biom_data(x5, 1, 3:6), label=label)
-  expect_equal(T6[1, 3:6], biom_data(x6, 1, 3:6), label=label)
-  expect_equal(T7[1, 3:6], biom_data(x7, 1, 3:6), label=label)
-  expect_equal(T8[1, 3:6], biom_data(x8, 1, 3:6), label=label)
+  # biom_data() with scalar row now returns a 1-row 2-D object (drop=FALSE fix).
+  # Compare as.matrix() on both sides to be agnostic about Matrix storage class
+  # (dgeMatrix vs dgCMatrix) while still checking values and dimnames.
+  expect_equal(as.matrix(T1[1, 3:6, drop=FALSE]), as.matrix(biom_data(x1, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T2[1, 3:6, drop=FALSE]), as.matrix(biom_data(x2, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T3[1, 3:6, drop=FALSE]), as.matrix(biom_data(x3, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T4[1, 3:6, drop=FALSE]), as.matrix(biom_data(x4, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T5[1, 3:6, drop=FALSE]), as.matrix(biom_data(x5, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T6[1, 3:6, drop=FALSE]), as.matrix(biom_data(x6, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T7[1, 3:6, drop=FALSE]), as.matrix(biom_data(x7, 1, 3:6)), label=label)
+  expect_equal(as.matrix(T8[1, 3:6, drop=FALSE]), as.matrix(biom_data(x8, 1, 3:6)), label=label)
 
   label = "single column and multiple rows"
-  expect_equal(T1[2:5, 3], biom_data(x1, 2:5, 3), label=label)
-  expect_equal(T2[2:5, 3], biom_data(x2, 2:5, 3), label=label)
-  expect_equal(T3[2:5, 3], biom_data(x3, 2:5, 3), label=label)
-  expect_equal(T4[2:5, 3], biom_data(x4, 2:5, 3), label=label)
-  expect_equal(T5[2:5, 3], biom_data(x5, 2:5, 3), label=label)
-  expect_equal(T6[2:5, 3], biom_data(x6, 2:5, 3), label=label)
-  expect_equal(T7[2:5, 3], biom_data(x7, 2:5, 3), label=label)
-  expect_equal(T8[2:5, 3], biom_data(x8, 2:5, 3), label=label)
+  # biom_data() with scalar col now returns a 1-col 2-D object (drop=FALSE fix).
+  # Compare as.matrix() on both sides (class-agnostic).
+  expect_equal(as.matrix(T1[2:5, 3, drop=FALSE]), as.matrix(biom_data(x1, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T2[2:5, 3, drop=FALSE]), as.matrix(biom_data(x2, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T3[2:5, 3, drop=FALSE]), as.matrix(biom_data(x3, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T4[2:5, 3, drop=FALSE]), as.matrix(biom_data(x4, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T5[2:5, 3, drop=FALSE]), as.matrix(biom_data(x5, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T6[2:5, 3, drop=FALSE]), as.matrix(biom_data(x6, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T7[2:5, 3, drop=FALSE]), as.matrix(biom_data(x7, 2:5, 3)), label=label)
+  expect_equal(as.matrix(T8[2:5, 3, drop=FALSE]), as.matrix(biom_data(x8, 2:5, 3)), label=label)
 })
 
 

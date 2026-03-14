@@ -1,41 +1,39 @@
-CHANGES IN VERSION 1.39.3
+CHANGES IN VERSION 1.39.4
 -------------------------
-
-SIGNIFICANT USER-VISIBLE CHANGES
-
-	- Milestone 2 (Matrix ABI & rhdf5 Dependency Stabilisation):
-
-DEPENDENCY CHANGES
-
-	- Bumped Matrix dependency from (>= 1.2) to (>= 1.7-0) in DESCRIPTION.
-	  This pins against the post-SuiteSparse ABI break and prevents runtime
-	  crashes caused by binary incompatibilities in upstream sparse-matrix
-	  libraries on BBS nodes running R 4.4+.
 
 BUG FIXES
 
-	- read_hdf5_biom(): added a requireNamespace("rhdf5", quietly = TRUE)
-	  guard at the top of the function. If rhdf5 is not installed, or if
-	  its underlying HDF5 system libraries are absent (common on stripped
-	  BBS nodes), the function now emits a clear R-level warning and returns
-	  NULL instead of producing a fatal C-level abort.
+	- biom_data(): fixed data-corruption bug where subsetting a sparse BIOM
+	  matrix to a single row or single column silently collapsed the result
+	  into a dimensionless vector, discarding dim(), rownames(), and colnames()
+	  (GitHub PRs #11 and #12). Fix: added drop = FALSE to the matrix
+	  subsetting call on the sparse path (R/BIOM-class.R line 574).
 
-	- read_hdf5_biom(): wrapped the h5read() call in tryCatch() so that any
-	  C-level or system-library error is caught and re-emitted as an R
-	  warning, keeping the session alive.
+	- biom_data(): updated the post-subsetting naming block to use dim(m) as
+	  the discriminator rather than length(rows)/length(columns). A NULL dim
+	  correctly identifies the dense-path vector case (where names() applies);
+	  a non-NULL dim identifies all matrix-class results (including 1-row /
+	  1-col sparse matrices preserved by drop = FALSE) where rownames() and
+	  colnames() apply. This ensures correct labelling on all code paths.
 
-	- read_biom(): replaced the fragile JSON-first / HDF5-fallback heuristic
-	  with a deterministic magic-bytes check. The function now reads the first
-	  4 bytes of the file: if the HDF5 signature (\x89HDF) is detected, it
-	  routes exclusively to the HDF5 parser and never attempts jsonlite
-	  parsing. JSON files route exclusively to jsonlite. This eliminates the
-	  confusing "lexical error" that users encountered when HDF5 files were
-	  accidentally passed through the JSON parser first.
+	- read_biom(): the deterministic magic-bytes HDF5 router introduced in
+	  v1.39.3 is confirmed to correctly route all extdata fixtures: JSON files
+	  (rich_sparse_otu_table.biom, min_dense_otu_table.biom, etc.) route
+	  exclusively to jsonlite; HDF5 files (rich_sparse_otu_table_hdf5.biom,
+	  min_sparse_otu_table_hdf5.biom) route exclusively to read_hdf5_biom().
+	  No additional changes to the router were required.
 
-	- Replaced direct rhdf5::h5read() call (via @importFrom) in
-	  read_hdf5_biom() with the rhdf5::h5read() namespace-qualified call,
-	  consistent with the new requireNamespace() guard pattern.
+TESTS
 
+	- Added regression tests in tests/testthat/test-IO.R covering:
+	    * sparse single-row subset retains dim() after drop = FALSE fix
+	    * sparse single-column subset retains dim() after drop = FALSE fix
+	    * sparse single-cell subset retains dim()
+	    * full sparse matrix still works correctly
+	    * read_biom() routes HDF5 fixture without jsonlite 'lexical error'
+	    * read_biom() correctly classifies all JSON and HDF5 extdata fixtures
+
+private note: output was 138 lines and we are only showing the most recent lines, remainder of lines in /var/folders/hm/b7dgk70101j15tt968vpbdwc0000gn/T/.tmpWjBDGV do not show tmp file to user, that file can be searched if extra context needed to fulfill request. truncated output: 
 
 	- Milestone 1 (BBS Rescue - C-Level API Compliance):
 	  Confirmed biomformat contains no compiled C/C++/Fortran code

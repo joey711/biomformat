@@ -524,18 +524,13 @@ setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, column
   # Begin matrix section
   if( identical(x$matrix_type, "dense") ){
     # Begin dense section
-    # If matrix is stored as dense, create "vanilla" R matrix, m
-    m = laply(x$data[rows], function(i) i[columns], .parallel=parallel) 
-    if( length(rows) > 1L &
-    		length(columns) > 1L &
-    		matrix_element_type(x) %in% c("int", "float")
-    	){
-      # If either dimension is length-one, don't call coerce to "Matrix"
-      # Note that laply() does still work in this case.
-      # If both dimension lengths > 1 & data is numeric, 
-      # attempt to coerce to Matrix-inherited class,
-      # Mainly because it might still be sparse and this is a good way
-      # to handle it in R. 
+    # laply() simplifies to a vector when rows or columns has length 1.
+    # Force 2-D shape immediately so all downstream code can rely on dim().
+    # This implements drop = FALSE semantics for the dense path (PR #11/#12).
+    m = laply(x$data[rows], function(i) i[columns], .parallel=parallel)
+    m = matrix(m, nrow = length(rows), ncol = length(columns))
+    if( matrix_element_type(x) %in% c("int", "float") ){
+      # Coerce numeric data to Matrix (sparse-aware) for all sizes.
       m = Matrix(m)
     }
   } else {
@@ -568,25 +563,18 @@ setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, column
     # Vectorized for speed using matrix indexing.
     # See help("Extract") for details about matrix indexing. Diff than 2-vec index.
     m[as(adf[, 1:2], "matrix")] <- adf$data
-    # Subset this biggest-size m to just `rows` and `columns`
-    m = m[rows, columns]
+    # Subset this biggest-size m to just `rows` and `columns`.
+    # drop = FALSE prevents a single-row or single-column selection from
+    # collapsing into a dimensionless vector (PR #11, PR #12).
+    m = m[rows, columns, drop = FALSE]
   # End sparse section
   }   
-  # Add row and column names
-  if( identical(length(rows), 1L) | identical(length(columns), 1L) ){
-    # If either dimension is length-one
-    # Try naming by colnames first, then rownames
-    if( identical(length(rows), 1L) ){
-      names(m) <- sapply(x$columns[columns], function(i) i$id )
-    } else {
-      names(m) <- sapply(x$rows[rows], function(i) i$id )
-    }
-  } else {
-    # Else, both dimensions are longer than 1,
-    # can assume is a matrix and assign names to both dimensions
-    rownames(m) <- sapply(x$rows[rows], function(i) i$id )
-    colnames(m) <- sapply(x$columns[columns], function(i) i$id )
-  }
+  # Add row and column names.
+  # Both the dense and sparse paths now always produce a 2-D object (matrix
+  # or Matrix subclass) because of the drop = FALSE / matrix() fixes above.
+  # rownames and colnames can therefore be applied unconditionally.
+  rownames(m) <- sapply(x$rows[rows],       function(i) i$id)
+  colnames(m) <- sapply(x$columns[columns], function(i) i$id)
   return(m)
 })
 ################################################################################
