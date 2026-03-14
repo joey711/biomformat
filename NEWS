@@ -1,7 +1,41 @@
-CHANGES IN VERSION 1.39.2
+CHANGES IN VERSION 1.39.3
 -------------------------
 
-BUILD SYSTEM / COMPLIANCE
+SIGNIFICANT USER-VISIBLE CHANGES
+
+	- Milestone 2 (Matrix ABI & rhdf5 Dependency Stabilisation):
+
+DEPENDENCY CHANGES
+
+	- Bumped Matrix dependency from (>= 1.2) to (>= 1.7-0) in DESCRIPTION.
+	  This pins against the post-SuiteSparse ABI break and prevents runtime
+	  crashes caused by binary incompatibilities in upstream sparse-matrix
+	  libraries on BBS nodes running R 4.4+.
+
+BUG FIXES
+
+	- read_hdf5_biom(): added a requireNamespace("rhdf5", quietly = TRUE)
+	  guard at the top of the function. If rhdf5 is not installed, or if
+	  its underlying HDF5 system libraries are absent (common on stripped
+	  BBS nodes), the function now emits a clear R-level warning and returns
+	  NULL instead of producing a fatal C-level abort.
+
+	- read_hdf5_biom(): wrapped the h5read() call in tryCatch() so that any
+	  C-level or system-library error is caught and re-emitted as an R
+	  warning, keeping the session alive.
+
+	- read_biom(): replaced the fragile JSON-first / HDF5-fallback heuristic
+	  with a deterministic magic-bytes check. The function now reads the first
+	  4 bytes of the file: if the HDF5 signature (\x89HDF) is detected, it
+	  routes exclusively to the HDF5 parser and never attempts jsonlite
+	  parsing. JSON files route exclusively to jsonlite. This eliminates the
+	  confusing "lexical error" that users encountered when HDF5 files were
+	  accidentally passed through the JSON parser first.
+
+	- Replaced direct rhdf5::h5read() call (via @importFrom) in
+	  read_hdf5_biom() with the rhdf5::h5read() namespace-qualified call,
+	  consistent with the new requireNamespace() guard pattern.
+
 
 	- Milestone 1 (BBS Rescue - C-Level API Compliance):
 	  Confirmed biomformat contains no compiled C/C++/Fortran code
