@@ -1,44 +1,91 @@
-
 # The biomformat Package for R
 
-[![Travis-CI Build Status](https://travis-ci.org/joey711/biomformat.svg?branch=master)](https://travis-ci.org/joey711/biomformat)
+[![Bioconductor release](https://img.shields.io/badge/Bioconductor-release-blue)](https://bioconductor.org/packages/release/bioc/html/biomformat.html)
+[![Bioconductor devel](https://img.shields.io/badge/Bioconductor-devel-green)](https://bioconductor.org/packages/devel/bioc/html/biomformat.html)
 
-# About 
+## About
 
-This is an R package for interfacing with both the JSON and HDF5 versions of the [biom file format](http://biom-format.org/). This package includes basic tools for reading biom-format files, accessing and subsetting data tables from a biom object, as well as limited support for writing a biom-object back to a biom-format file.
+This is an R package for interfacing with both the JSON (BIOM v1) and HDF5
+(BIOM v2) versions of the [BIOM file format](http://biom-format.org/).
+It includes tools for reading BIOM files, accessing and subsetting the data
+matrix and associated metadata from a biom object, as well as support for
+writing a biom object back to a BIOM-format file.
 
-# Design
+## Installation
 
-The design of this API is intended to match the python API where appropriate, while maintaining a decidedly "R flavor" that should be familiar to R users. This includes S4 classes and methods, as well as extensions of common core functions/methods.
+Install the current Bioconductor release version:
 
-# Installation
-
-To install the latest stable release of the biomformat package enter the following in an R session (after official release).
-
-```S
-if (!requireNamespace("BiocManager", quietly=TRUE))
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("biomformat")
 ```
 
-Before official release, or to install the latest development version, enter the following into an R session.
+Install the latest development version directly from GitHub:
 
-```S
-install.packages("devtools") # if not already installed
-devtools::install_github("joey711/biomformat")
+```r
+if (!requireNamespace("remotes", quietly = TRUE))
+    install.packages("remotes")
+remotes::install_github("joey711/biomformat")
 ```
 
-# Support
+## Quick start
 
- * Please post feature or support requests and bugs at the [Issues Tracker for the biomformat package](https://github.com/joey711/biomformat/issues) on GitHub.
- Issues related to the format itself and not the R interface should be posted on the [issues tracker for the biom-format team](https://github.com/biocore/biom-format/issues).
- 
- * Note that this is a separate (but friendly!) project from the biom-format team, and the software license is different between this package and much of the rest of the biom-format software, which has switched to BSD.
+```r
+library(biomformat)
 
- * This package is scheduled for inclusion in the next stable release of the Bioconductor project (BioC).
- BioC is also where [the rhdf5 package](http://bioconductor.org/packages/release/bioc/html/rhdf5.html) lives.
+# Read a BIOM file (JSON v1 or HDF5 v2 — format is detected automatically)
+biom_file <- system.file("extdata", "rich_sparse_otu_table.biom",
+                         package = "biomformat")
+x <- read_biom(biom_file)
 
- * The original release of this package was [made available through CRAN](http://cran.r-project.org/web/packages/biom/index.html), 
- as the "biom" package, supporting version 1.x (JSON) only.
- The current plan is to let "biom" remain on CRAN in maintenance-only mode until "biomformat" is released on Bioconductor. At which point "biom" will be considered deprecated, and eventually removed.
+# Inspect the object
+x
+biom_shape(x)   # rows (observations) x columns (samples)
 
+# Extract the count matrix (returns a Matrix object)
+biom_data(x)
+
+# Extract sample and observation metadata
+sample_metadata(x)
+observation_metadata(x)
+
+# Build a biom object from R data and write it to file
+y <- make_biom(data = my_count_matrix,
+               sample_metadata = my_sample_df,
+               observation_metadata = my_tax_df)
+write_biom(y, "output.biom")
+```
+
+## Recent changes (v1.39.2 – v1.39.4)
+
+These versions rescue the package from Bioconductor deprecation and fix
+several long-standing data-integrity bugs. See [NEWS](NEWS) for full details
+and GitHub issue/PR cross-references.
+
+| Version | Summary |
+|---------|---------|
+| **1.39.4** | `biom_data()`: `drop = FALSE` on dense and sparse paths — single-row/col subsets now always return a matrix, never a vector. Closes [PR #12](https://github.com/joey711/biomformat/pull/12). |
+| **1.39.3** | `read_biom()`: deterministic HDF5 magic-bytes router replaces fragile JSON-first fallback, eliminating the `lexical error: invalid char` warning. Closes [Issue #14](https://github.com/joey711/biomformat/issues/14), supersedes [PR #16](https://github.com/joey711/biomformat/pull/16). `read_hdf5_biom()`: graceful `requireNamespace()` + `tryCatch()` guards replace fatal C-level aborts. Bumped `Matrix >= 1.7-0`. |
+| **1.39.2** | Fix fatal `R CMD check` ERROR from deprecated `testthat` 2.x helpers (`expect_that`/`is_true()`). Addresses [Issue #17](https://github.com/joey711/biomformat/issues/17). |
+
+## Design
+
+The API is intended to match the Python biom-format API where appropriate,
+while maintaining a decidedly "R flavour" — S4 classes and methods, and
+extensions of common base-R generics (`nrow`, `ncol`, `rownames`,
+`colnames`, `show`).
+
+## Support
+
+- Please post bug reports and feature requests on the
+  [Issues Tracker](https://github.com/joey711/biomformat/issues).
+- Issues related to the BIOM format specification (rather than the R
+  interface) should go to the
+  [biom-format team's tracker](https://github.com/biocore/biom-format/issues).
+- For Bioconductor-specific questions, use the
+  [Bioconductor support site](https://support.bioconductor.org/) or the
+  [bioc-devel mailing list](mailto:bioc-devel@r-project.org).
+- This package is available on
+  [Bioconductor](https://bioconductor.org/packages/biomformat/), where
+  the [rhdf5](http://bioconductor.org/packages/rhdf5/) dependency also lives.
