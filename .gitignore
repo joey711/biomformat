@@ -1,0 +1,5 @@
+
+# R CMD check output
+*.Rcheck/
+# Built tarballs
+*.tar.gz

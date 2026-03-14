@@ -1,3 +1,45 @@
+CHANGES IN VERSION 1.39.5
+-------------------------
+
+DEPENDENCY CHANGES
+
+	- Removed plyr (>= 1.8) from Imports entirely. plyr is unmaintained and
+	  every use in this codebase now has a direct base-R equivalent.
+	  This eliminates an unmaintained dependency and reduces install footprint.
+
+	- Bumped R dependency from >= 3.2 to >= 4.1, ensuring modern base-R idioms
+	  (including the native pipe |>) are available.
+
+	- Replaced import(Matrix) (whole-namespace) with selective
+	  importFrom(Matrix, Matrix, sparseMatrix, drop0) in NAMESPACE.
+	  Replaced import(methods) with selective importFrom(methods, ...).
+	  Follows CRAN/Bioconductor best practices; prevents namespace pollution.
+
+USER-VISIBLE CHANGES
+
+	- biom_data(), sample_metadata(), observation_metadata(): the parallel=
+	  argument is now a no-op with a deprecation warning when passed as TRUE.
+	  The plyr-backed parallel execution it previously enabled no longer exists.
+	  Existing code that passes parallel=FALSE (the default) is unaffected.
+
+INTERNAL CHANGES
+
+	- make_biom(): replaced plyr::alply() with lapply(seq_len(nrow(...)))
+	  for building per-row named metadata lists.
+
+	- biom_data() dense path: replaced plyr::laply() with
+	  do.call(rbind, lapply(...)).
+
+	- biom_data() sparse numeric path: replaced plyr::ldply(x$data) with
+	  do.call(rbind, lapply(x$data, as.data.frame)).
+
+	- biom_data() sparse unicode path: replaced plyr::ldply(x$data, function...)
+	  with do.call(rbind, lapply(x$data, function(e) ...)).
+
+	- extract_metadata(): replaced plyr::llply()/plyr::ldply() with
+	  lapply() / do.call(rbind, lapply(...)).
+
+
 CHANGES IN VERSION 1.39.4
 -------------------------
 
