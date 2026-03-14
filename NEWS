@@ -1,3 +1,29 @@
+CHANGES IN VERSION 1.39.2
+-------------------------
+
+BUILD SYSTEM / COMPLIANCE
+
+	- Milestone 1 (BBS Rescue - C-Level API Compliance):
+	  Confirmed biomformat contains no compiled C/C++/Fortran code
+	  (NeedsCompilation: no; no src/ directory). The package therefore
+	  requires no changes for R_Calloc/R_Realloc/R_Free or Rf_allocVector
+	  API compliance -- there are zero legacy C macros to replace.
+
+BUG FIXES
+
+	- Fixed fatal test failure under testthat >= 3.0: replaced all
+	  deprecated expect_that(x, is_true()), expect_that(x, is_identical_to(y)),
+	  and expect_that(x, is_a("cls")) calls in tests/testthat/test-IO.R with
+	  their modern equivalents (expect_true(), expect_identical(),
+	  expect_true(is(x, "cls"))). This resolves the ERROR in R CMD check
+	  that was the primary BBS deprecation trigger.
+
+	- Added missing importFrom(stats, setNames) and
+	  importFrom(utils, packageVersion) directives to NAMESPACE, resolving
+	  "no visible global function definition" NOTEs from R CMD check.
+
+	- Updated Date field in DESCRIPTION to current date (2026-03-14).
+
 CHANGES IN VERSION 0.3.13
 -------------------------
 
