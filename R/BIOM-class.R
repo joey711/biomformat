@@ -130,8 +130,6 @@ setMethod("biom", c("list"), function(x){
 #' 
 #' \code{\link{read_biom}} 
 #'
-#' @importFrom plyr alply
-#'
 #' @export
 #'
 #' @examples
@@ -165,20 +163,32 @@ setMethod("biom", c("list"), function(x){
 make_biom <- function(data, sample_metadata=NULL, observation_metadata=NULL, id=NULL, matrix_element_type="int"){
   # The observations / features / OTUs / rows "meta" data table
   if(!is.null(observation_metadata)){
+    # Build per-row named list using base R (replaces plyr::alply).
+    # Using obs_mat[i,] (not drop=FALSE) preserves column names in the list.
+    obs_mat  <- as.matrix(observation_metadata)
+    obs_rows <- lapply(seq_len(nrow(obs_mat)),
+                       function(i) as.list(obs_mat[i, ]))
     rows = mapply(list, SIMPLIFY=FALSE, id=as.list(rownames(data)),
-                  metadata=alply(as.matrix(observation_metadata), 1, .expand=FALSE, .dims=TRUE))
+                  metadata=obs_rows)
   } else {
     rows = mapply(list, id=as.list(rownames(data)), metadata=NA, SIMPLIFY=FALSE)
   }
   # The samples / sites / columns "meta" data table
   if(!is.null(sample_metadata)){
+    # Build per-row named list using base R (replaces plyr::alply).
+    # Using smp_mat[i,] (not drop=FALSE) preserves column names in the list.
+    smp_mat  <- as.matrix(sample_metadata)
+    smp_rows <- lapply(seq_len(nrow(smp_mat)),
+                       function(i) as.list(smp_mat[i, ]))
     columns = mapply(list, SIMPLIFY=FALSE, id=as.list(colnames(data)),
-                     metadata=alply(as.matrix(sample_metadata), 1, .expand=FALSE, .dims=TRUE)) 
+                     metadata=smp_rows)
   } else {
     columns = mapply(list, id=as.list(colnames(data)), metadata=NA, SIMPLIFY=FALSE)
   }
   # Convert the contingency table to a list
-  datalist = as.list(as.data.frame(as(t(data), "matrix")))
+  # Use as.matrix() first so t() dispatches correctly for both base matrix
+  # and Matrix (sparse/dense) objects.
+  datalist = as.list(as.data.frame(t(as.matrix(data))))
   names(datalist) <- NULL
   # Define the list, instantiate as biom-format, and return
   # (Might eventually expose some of these list elements as function arguments)
@@ -440,10 +450,9 @@ setMethod("colnames", c("biom"), function(x){
 #'  can improve speed/efficiency.
 #'  Can be vector of index numbers (\code{\link{numeric-class}}) or 
 #'  index names (\code{\link{character-class}}).
-#' @param parallel (Optional). Logical. Whether to perform the accession parsing
-#'  using a parallel-computing backend supported by the \code{\link{plyr-package}}
-#'  via the \code{\link[foreach]{foreach-package}}. Note: At the moment, the header
-#'  accessor does not need nor does it support parallel-computed parsing.
+#' @param parallel (Optional). Logical. Defunct; retained for backward
+#'  compatibility only. Passing \code{TRUE} emits a deprecation warning
+#'  and has no effect. Will be removed in a future version.
 #'  
 #'  @return A matrix containing the main observation data, with index names.
 #'   The type of data (numeric or character) 
@@ -510,11 +519,12 @@ setMethod("biom_data", c("biom", "missing", "numeric"), function(x, rows, column
   biom_data(x, 1:nrow(x), columns, parallel)
 })
 #' @rdname biom_data-methods
-#' @import Matrix
-#' @importFrom plyr d_ply
-#' @importFrom plyr ldply
-#' @importFrom plyr laply
+#' @importFrom Matrix Matrix sparseMatrix drop0
 setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, columns, parallel){
+  # The parallel= argument is defunct. Warn if caller passes TRUE.
+  if (isTRUE(parallel))
+    warning("The 'parallel' argument is defunct and has no effect. ",
+            "It will be removed in a future version.")
   if( identical(length(rows), 0) ){
     stop("argument `rows` must have non-zero length.")
   }
@@ -524,10 +534,10 @@ setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, column
   # Begin matrix section
   if( identical(x$matrix_type, "dense") ){
     # Begin dense section
-    # laply() simplifies to a vector when rows or columns has length 1.
+    # do.call(rbind, lapply(...)) replaces laply() from plyr.
     # Force 2-D shape immediately so all downstream code can rely on dim().
     # This implements drop = FALSE semantics for the dense path (PR #11/#12).
-    m = laply(x$data[rows], function(i) i[columns], .parallel=parallel)
+    m = do.call(rbind, lapply(x$data[rows], function(i) i[columns]))
     m = matrix(m, nrow = length(rows), ncol = length(columns))
     if( matrix_element_type(x) %in% c("int", "float") ){
       # Coerce numeric data to Matrix (sparse-aware) for all sizes.
@@ -540,17 +550,19 @@ setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, column
     if(matrix_element_type(x) %in% c("int", "float")){
       # If data is numeric, initialize with Matrix (numeric data only)
       m = Matrix(0, nrow=nrow(x), ncol=ncol(x), sparse=TRUE)
-      # Create an assignment data.frame
-      adf = ldply(x$data)
+      # Create an assignment data.frame (replaces ldply from plyr).
+      # Each element of x$data is a 3-element vector [row, col, value];
+      # do.call(rbind, ...) stacks them into a matrix, then coerce to data.frame.
+      adf = as.data.frame(do.call(rbind, x$data))
     } else {
       # Else, matrix_element_type must be "unicode" for a unicode string.
       # Use a standard R character matrix
       m = matrix(NA_character_, nrow(x), ncol(x))
-      # Create an assignment data.frame.
+      # Create an assignment data.frame (replaces ldply from plyr).
       # Is slightly more complicated for sparse JSON w/ character values
-      adf = ldply(x$data, function(x){
-                data.frame(r=x[[1]], c=x[[2]], data=x[[3]], stringsAsFactors=FALSE)
-            })
+      adf = do.call(rbind, lapply(x$data, function(e){
+                data.frame(r=e[[1]], c=e[[2]], data=e[[3]], stringsAsFactors=FALSE)
+            }))
     }
     colnames(adf) <- c("r", "c", "data")
     # indices start at 0 in biom sparse format, 
@@ -593,9 +605,9 @@ setMethod("biom_data", c("biom", "numeric", "numeric"), function(x, rows, column
 #'  Can be vector of index numbers (\code{\link{numeric-class}}) or 
 #'  index names (\code{\link{character-class}}).
 #'  
-#' @param parallel (Optional). Logical. Whether to perform the accession parsing
-#'  using a parallel-computing backend supported by the \code{\link{plyr-package}}
-#'  via the \code{\link[foreach]{foreach-package}}. 
+#' @param parallel (Optional). Logical. Defunct; retained for backward
+#'  compatibility only. Passing \code{TRUE} emits a deprecation warning
+#'  and has no effect. Will be removed in a future version.
 #'  
 #' @return A \code{\link{data.frame}} or \code{\link{list}} containing 
 #'  the meta data, with index names. The precise form of the object returned
@@ -647,6 +659,10 @@ setMethod("sample_metadata", c("biom", "character"), function(x, columns, parall
 })
 #' @rdname sample_metadata-methods
 setMethod("sample_metadata", c("biom", "numeric"), function(x, columns, parallel=FALSE){
+	# The parallel= argument is defunct. Warn if caller passes TRUE.
+	if (isTRUE(parallel))
+		warning("The 'parallel' argument is defunct and has no effect. ",
+		        "It will be removed in a future version.")
 	if( any(columns > ncol(x)) ){
 		warning(paste0("column indices ",
 									 paste0(columns[columns > ncol(x)], collapse=" "),
@@ -671,9 +687,9 @@ setMethod("sample_metadata", c("biom", "numeric"), function(x, columns, parallel
 #'  This parameter can be vector of index numbers (\code{\link{numeric-class}}) or 
 #'  index names (\code{\link{character-class}}).
 #'  
-#' @param parallel (Optional). Logical. Whether to perform the accession parsing
-#'  using a parallel-computing backend supported by the \code{\link{plyr-package}}
-#'  via the \code{\link[foreach]{foreach-package}}. 
+#' @param parallel (Optional). Logical. Defunct; retained for backward
+#'  compatibility only. Passing \code{TRUE} emits a deprecation warning
+#'  and has no effect. Will be removed in a future version.
 #'  
 #' @return A \code{\link{data.frame}} or \code{\link{list}} containing 
 #'  the meta data, with index names. The precise form of the object returned
@@ -727,6 +743,10 @@ setMethod("observation_metadata", c("biom", "character"), function(x, rows, para
 })
 #' @rdname observation_metadata-methods
 setMethod("observation_metadata", c("biom", "numeric"), function(x, rows, parallel=FALSE){
+	# The parallel= argument is defunct. Warn if caller passes TRUE.
+	if (isTRUE(parallel))
+		warning("The 'parallel' argument is defunct and has no effect. ",
+		        "It will be removed in a future version.")
 	if( any(rows > nrow(x)) ){
 		warning(paste0("Row indices ",
 									 paste0(rows[rows > nrow(x)], collapse=" "),
@@ -737,31 +757,29 @@ setMethod("observation_metadata", c("biom", "numeric"), function(x, rows, parall
 })
 ################################################################################
 # Generic internal function for extracting metadata from either rows or columns
-#' @importFrom plyr ldply
-#' @importFrom plyr llply
 #' @keywords internal
 extract_metadata = function(x, indextype, indices, parallel=FALSE){
-	# Immediately extract just those index indicated by `index` argument
+	# parallel= is defunct; warning already emitted by callers if needed
+	# Immediately extract just those entries indicated by the indices argument
 	metalist = x[[indextype]][indices]
-	# Extract metadata elements as a list, for checking dimensions, NULL, etc.
-	rx = llply(metalist, function(i) unlist(i$metadata), .parallel=parallel)
+	# Extract metadata elements as a list (replaces llply from plyr)
+	rx = lapply(metalist, function(i) unlist(i$metadata))
 	if( all(sapply(rx, is.null)) ){
 		# If there is no metadata (all NULL),
 		# then set metadata to NULL, representing empty.
 		metadata = NULL
 	} else {
 		# Else, extract names and metadata (both required)
-		# Extract names
 		metaids = sapply(metalist, function(i) i$id)
 		# Test if length of metadata entries is same for all indices.
 		rxlengths = sapply(rx, length)
 		if( all( rxlengths == rxlengths[1]) ){
-			# If so, can parse it as data.frame with ldply
-			# return a data.frame with colnames
-			metadata = ldply(rx, .parallel=parallel)
+			# If so, build a data.frame (replaces ldply from plyr)
+			metadata = do.call(rbind,
+			    lapply(rx, function(r) as.data.frame(t(r), stringsAsFactors=FALSE)))
 			rownames(metadata) <- metaids
 		} else {
-			# Else, should keep it as a list. But should name the entries
+			# Else, keep as a named list
 			metadata = rx
 			names(metadata) <- metaids
 		}

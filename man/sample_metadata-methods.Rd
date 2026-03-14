@@ -26,9 +26,9 @@ sample_metadata(x, columns, parallel = FALSE)
  Can be vector of index numbers (\code{\link{numeric-class}}) or
  index names (\code{\link{character-class}}).}
 
-\item{parallel}{(Optional). Logical. Whether to perform the accession parsing
- using a parallel-computing backend supported by the \code{\link{plyr-package}}
- via the \code{\link[foreach]{foreach-package}}.}
+\item{parallel}{(Optional). Logical. Defunct; retained for backward
+ compatibility only. Passing \code{TRUE} emits a deprecation warning
+ and has no effect. Will be removed in a future version.}
 }
 \value{
 A \code{\link{data.frame}} or \code{\link{list}} containing

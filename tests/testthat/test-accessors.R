@@ -196,3 +196,24 @@ test_that("Test metadata bad-index warnings", {
 	expect_error(out<-observation_metadata(x3, c("non-id", "also-not-there")))
 	expect_error(out<-sample_metadata(x3, c("non-id", "also-not-there")))
 })
+
+test_that("parallel=TRUE emits deprecation warning (argument is defunct)", {
+  # biom_data() with parallel=TRUE must warn; value must still be correct
+  expect_warning(
+    out <- biom_data(x2, parallel = TRUE),
+    regexp = "defunct"
+  )
+  expect_equal(out, T2)
+
+  # sample_metadata() with parallel=TRUE must also warn
+  expect_warning(
+    sample_metadata(x3, 1:ncol(x3), parallel = TRUE),
+    regexp = "defunct"
+  )
+
+  # observation_metadata() with parallel=TRUE must also warn
+  expect_warning(
+    observation_metadata(x3, 1:nrow(x3), parallel = TRUE),
+    regexp = "defunct"
+  )
+})
