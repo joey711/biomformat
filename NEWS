@@ -1,3 +1,99 @@
+CHANGES IN VERSION 1.39.4
+-------------------------
+
+BUG FIXES
+
+	- biom_data(): fixed data-corruption bug on both dense and sparse BIOM paths
+	  where subsetting to a single row or single column silently collapsed the
+	  result into a dimensionless named vector, discarding dim(), rownames(), and
+	  colnames(). This caused downstream tools (notably phyloseq::import_biom())
+	  to fail silently or produce incorrect OTU tables.
+	  Fix: on the sparse path, added drop = FALSE to the matrix subsetting call
+	  (m[rows, columns, drop = FALSE]). On the dense path, the laply() result is
+	  now immediately reshaped with matrix(m, nrow, ncol) before Matrix() coercion,
+	  ensuring a 2-D object is always returned regardless of dimension lengths.
+	  Closes GitHub PR #12 (https://github.com/joey711/biomformat/pull/12):
+	    "Fix biom_data() when dealing with 1-taxon and 1-sample BIOM data"
+	  Supersedes GitHub PR #11 (https://github.com/joey711/biomformat/pull/11):
+	    "Fix unidentical biom output by make_biom()"
+
+	- biom_data(): simplified the post-subsetting naming block. Both paths now
+	  always produce a 2-D object, so rownames() and colnames() are applied
+	  unconditionally on all code paths (the previous is.null(dim(m)) branch
+	  is no longer needed).
+
+TESTS
+
+	- Added regression tests in tests/testthat/test-IO.R covering all new
+	  behaviour introduced across v1.39.2-v1.39.4:
+	    * sparse single-row subset retains dim() and dimnames (PR #12)
+	    * sparse single-col subset retains dim() and dimnames (PR #12)
+	    * sparse single-cell (1x1) subset retains dim()
+	    * full sparse matrix unaffected by drop = FALSE fix
+	    * read_biom() routes HDF5 fixture cleanly without jsonlite warning
+	      (Issue #14, PR #16)
+	    * read_biom() correctly classifies all JSON and HDF5 extdata fixtures
+
+CHANGES IN VERSION 1.39.3
+-------------------------
+
+BUG FIXES
+
+	- read_biom(): replaced the fragile JSON-first / HDF5-fallback try() chain
+	  with a deterministic magic-bytes router. The function now reads the first
+	  4 bytes of the file; if the HDF5 signature (\x89 H D F) is detected it
+	  routes exclusively to read_hdf5_biom() and never invokes jsonlite. JSON
+	  files route exclusively to jsonlite. This eliminates the confusing
+	  "lexical error: invalid char in json text ... <89>HDF" warning that users
+	  encountered when HDF5 files were accidentally passed through the JSON
+	  parser first.
+	  Closes GitHub Issue #14 (https://github.com/joey711/biomformat/issues/14):
+	    "Unable to read HDF5 biom file"
+	  Supersedes GitHub PR #16 (https://github.com/joey711/biomformat/pull/16):
+	    "Improve handling of HDF5 BIOM files"
+	  Partially addresses GitHub Issue #5 (https://github.com/joey711/biomformat/issues/5)
+	  and Issue #3 (https://github.com/joey711/biomformat/issues/3):
+	    fatal C-level aborts when reading large or malformed HDF5 files are now
+	    caught by the new tryCatch() wrapper in read_hdf5_biom() and re-emitted
+	    as informative R-level warnings instead of crashing the session.
+
+	- read_hdf5_biom(): added requireNamespace("rhdf5", quietly = TRUE) guard.
+	  If the rhdf5 package is not installed, or if the underlying HDF5 system
+	  libraries are absent (common on stripped BBS nodes or end-user machines
+	  without libhdf5), the function now emits a clear R-level warning
+	  identifying the missing dependency and returns NULL invisibly, instead of
+	  producing a fatal C-level abort.
+
+	- read_hdf5_biom(): wrapped the h5read() call in tryCatch() so that any
+	  C-level or system-library error is caught and re-emitted as an informative
+	  R warning, keeping the R session alive.
+
+DEPENDENCY CHANGES
+
+	- Bumped Matrix dependency from (>= 1.2) to (>= 1.7-0) in DESCRIPTION.
+	  This pins the package against the post-SuiteSparse ABI break and prevents
+	  runtime crashes caused by binary incompatibilities in upstream sparse-matrix
+	  libraries on BBS nodes running R 4.4+.
+
+CHANGES IN VERSION 1.39.2
+-------------------------
+
+BUG FIXES
+
+	- Fixed fatal test ERROR under testthat >= 3.0.0: replaced all deprecated
+	  expect_that(x, is_true()), expect_that(x, is_identical_to(y)), and
+	  expect_that(x, is_a("cls")) calls in tests/testthat/test-IO.R with their
+	  modern equivalents (expect_true(), expect_identical(), expect_is(),
+	  expect_true(is(x, "cls"))). The removed helpers caused the entire test
+	  suite to ERROR on current Bioconductor BBS nodes, which was the primary
+	  trigger for the deprecation warning.
+	  Addresses GitHub Issue #17 (https://github.com/joey711/biomformat/issues/17):
+	    "Bioconductor failure and risk of deprecation"
+
+	- Added missing importFrom(stats, setNames) and importFrom(utils,
+	  packageVersion) directives to NAMESPACE, resolving "no visible global
+	  function definition" NOTEs from R CMD check.
+
 CHANGES IN VERSION 0.3.13
 -------------------------
 

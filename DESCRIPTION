@@ -1,6 +1,6 @@
 Package: biomformat
-Version: 1.29.1
-Date: 2023-08-01
+Version: 1.39.4
+Date: 2026-03-14
 Maintainer: Paul J. McMurdie <mcmurdie@alumni.stanford.edu>
 License: GPL-2
 Title: An interface package for the BIOM file format
@@ -13,7 +13,7 @@ Description: This is an R package for interfacing with the BIOM format. This pac
                  back to a biom-format file. The design of this API is intended to match the python API and other tools included with the biom-format
                  project, but with a decidedly "R flavor" that should be familiar to R users. This includes S4 classes and methods, as well as extensions of
                  common core functions/methods.
-Imports: plyr (>= 1.8), jsonlite (>= 0.9.16), Matrix (>= 1.2), rhdf5
+Imports: plyr (>= 1.8), jsonlite (>= 0.9.16), Matrix (>= 1.7-0), rhdf5
 Depends: R (>= 3.2), methods
 Suggests: testthat (>= 0.10), knitr (>= 1.10), BiocStyle (>= 1.6), rmarkdown (>= 0.7)
 VignetteBuilder: knitr
