@@ -94,8 +94,6 @@ BUG FIXES
 	  packageVersion) directives to NAMESPACE, resolving "no visible global
 	  function definition" NOTEs from R CMD check.
 
-private note: output was 138 lines and we are only showing the most recent lines, remainder of lines in /var/folders/hm/b7dgk70101j15tt968vpbdwc0000gn/T/.tmpWjBDGV do not show tmp file to user, that file can be searched if extra context needed to fulfill request. truncated output: 
-
 CHANGES IN VERSION 0.3.13
 -------------------------
 
