@@ -330,6 +330,89 @@ From here the full Bioconductor ecosystem is available — for example,
 downstream use with `DESeq2`, `edgeR`, `limma`, etc.
 
 
+
+# Constructing a BIOM from R data
+
+The `make_biom()` function builds a valid biom object from standard R matrices
+and data frames. This is the recommended path for workflows like
+[dada2](https://benjjneb.github.io/dada2/) where you already have a count
+matrix and taxonomy table in R.
+
+```{r make_biom_workflow}
+# Simulate a small ASV count table (rows = features, cols = samples)
+set.seed(42)
+mat <- matrix(
+  sample(0:50, 15, replace = TRUE), nrow = 3, ncol = 5,
+  dimnames = list(
+    paste0("ASV", 1:3),
+    paste0("Samp", 1:5)
+  )
+)
+
+# Taxonomy table: one row per feature, one list-valued column "taxonomy"
+# Each element is a character vector of rank assignments (kingdom -> species).
+tax <- data.frame(
+  taxonomy = I(list(
+    c("Bacteria", "Firmicutes",      "Clostridia",   "Clostridiales",
+      "Lachnospiraceae", "Blautia", "NA"),
+    c("Bacteria", "Proteobacteria", "Gammaproteobacteria", "Enterobacteriales",
+      "Enterobacteriaceae", "Escherichia", "coli"),
+    c("Bacteria", "Bacteroidetes",  "Bacteroidia",  "Bacteroidales",
+      "Bacteroidaceae", "Bacteroides", "fragilis")
+  )),
+  row.names = rownames(mat)
+)
+
+# Build the biom object
+x <- make_biom(data = mat, observation_metadata = tax,
+               matrix_element_type = "int")
+x
+
+# Write to a JSON BIOM file and read back
+tmp <- tempfile(fileext = ".biom")
+write_biom(x, tmp)
+y <- read_biom(tmp)
+
+# Count data survives the round-trip
+identical(biom_data(x), biom_data(y))
+
+# Observation metadata is preserved (taxonomy values, not column name)
+head(observation_metadata(y))
+```
+
+> **Large datasets:** `write_biom()` serialises to a single JSON string and
+> will fail for very large tables (> ~2 GB serialised).  For large datasets
+> use `write_hdf5_biom()` instead — HDF5 has no size constraint.
+
+```{r make_biom_hdf5, eval=requireNamespace("rhdf5", quietly=TRUE)}
+# For large datasets, write HDF5 (BIOM v2) instead
+hdf5_tmp <- tempfile(fileext = ".biom")
+write_hdf5_biom(x, hdf5_tmp)
+z <- read_biom(hdf5_tmp)
+identical(biom_data(x), biom_data(z))
+```
+
+
+# Subsetting biom_data() by name
+
+`biom_data()` accepts character vectors for the `rows` and `columns` arguments,
+allowing you to subset by feature or sample name directly without needing to
+look up integer indices first.
+
+```{r named_subsetting}
+biom_file <- system.file("extdata", "rich_sparse_otu_table.biom",
+                          package = "biomformat")
+x <- read_biom(biom_file)
+
+# All samples for a specific feature
+biom_data(x, rows = "GG_OTU_3")
+
+# A specific set of samples for two features
+biom_data(x, rows = c("GG_OTU_1", "GG_OTU_3"),
+              columns = c("Sample1", "Sample3", "Sample5"))
+```
+
+
 # Session info
 
 ```{r session-info}

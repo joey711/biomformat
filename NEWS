@@ -1,3 +1,24 @@
+CHANGES IN VERSION 1.39.14
+--------------------------
+
+DOCUMENTATION / VIGNETTE
+
+	- Added two new vignette sections to vignettes/biomformat.Rmd:
+
+	  * "Constructing a BIOM from R data": end-to-end make_biom() workflow
+	    showing how to build a biom object from a count matrix and a
+	    data.frame taxonomy table with list-valued columns (the dada2 pattern),
+	    write it with write_biom(), and read it back. Includes a callout
+	    directing large-dataset users to write_hdf5_biom() (addressing Issue
+	    #8), with a guarded HDF5 code chunk. Directly addresses Issues #4,
+	    #6, #9 for users who land on the vignette.
+
+	  * "Subsetting biom_data() by name": demonstrates the character-vector
+	    row/column subsetting interface of biom_data() that was previously
+	    undocumented in the vignette.
+
+	  R CMD check: 0 ERRORs, 0 NOTEs, 2 pre-existing vignette WARNINGs.
+
 CHANGES IN VERSION 1.39.13
 --------------------------
 
