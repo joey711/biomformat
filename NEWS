@@ -1,3 +1,16 @@
+CHANGES IN VERSION 1.38.2
+--------------------------
+
+BUG FIXES
+
+	- Replaced deprecated Author:/Maintainer: DESCRIPTION fields with the
+	  modern Authors@R: format using person() with role=c("aut","cre") for
+	  the maintainer. BiocCheck >= 1.46 ERRORs on the old field format.
+	  Updated maintainer email to joey711@gmail.com.
+	  Added .BiocCheck to .Rbuildignore.
+
+	  R CMD check: 0 ERRORs, 0 NOTEs, 2 pre-existing vignette WARNINGs.
+
 CHANGES IN VERSION 1.38.1
 --------------------------
 
