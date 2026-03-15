@@ -1,3 +1,22 @@
+CHANGES IN VERSION 1.39.10
+--------------------------
+
+NEW FEATURES
+
+	- Updated vignette with four new sections:
+	  * HDF5 (BIOM v2) read and write via write_hdf5_biom() / read_biom(),
+	    including JSON-to-HDF5 conversion.
+	  * Tidy long-format output via as.data.frame() and as_tibble.biom(),
+	    with purrr-style summarisation examples (Shannon diversity,
+	    per-sample total counts) and base-R fallbacks.
+	  * SummarizedExperiment interoperability via
+	    biom_to_SummarizedExperiment() and as(x, "SummarizedExperiment"),
+	    showing assay(), colData(), and rowData() access.
+	  * Session info section.
+	- All new vignette sections are guarded with requireNamespace() so
+	  the vignette builds cleanly without optional dependencies
+	  (rhdf5, tibble, purrr/dplyr, SummarizedExperiment/S4Vectors).
+
 CHANGES IN VERSION 1.39.9
 -------------------------
 

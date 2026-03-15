@@ -129,7 +129,7 @@ heatmap(as(biom_data(x4), "matrix"))
 ```
 
 
-# Write BIOM format
+# Write BIOM format (JSON / v1)
 
 The biom objects in R can be written to a file/connection using the `write_biom` function. If you modified the biom object, this may still work as well, but no guarantees about this as we are still working on internal checks. The following example writes `x4` to a temporary file, then reads it back using `read_biom` and stores it as variable `y`. The exact comparison of these two objects using the `identical` function shows that they are exactly the same in R.
 ```{r write-biom-examples}
@@ -149,3 +149,189 @@ system(paste0("FC ", rich_sparse_file, outfile))
 ```
 
 
+# HDF5 (BIOM v2) read and write
+
+BIOM v2 uses the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) binary format,
+which stores both sample-major and observation-major compressed-sparse representations
+of the count matrix.
+Reading is handled automatically by `read_biom()` — it detects HDF5 files by
+their magic bytes and routes to `read_hdf5_biom()` internally.
+Writing to HDF5 is done with `write_hdf5_biom()`.
+
+Both functions require the Bioconductor package
+[rhdf5](https://bioconductor.org/packages/rhdf5).
+If it is not installed they stop with a clear installation message rather than
+a cryptic C-level error.
+
+```{r hdf5-available, include=FALSE}
+hdf5_ok <- requireNamespace("rhdf5", quietly = TRUE)
+```
+
+```{r hdf5-read, eval=hdf5_ok}
+hdf5_file <- system.file("extdata", "rich_sparse_otu_table_hdf5.biom",
+                          package = "biomformat")
+xh <- read_biom(hdf5_file)
+xh
+biom_data(xh)
+```
+
+Round-trip through `write_hdf5_biom()`: write the object to a temporary HDF5
+file, read it back, and confirm the count data and metadata are preserved.
+
+```{r hdf5-write, eval=hdf5_ok}
+hdf5_out <- tempfile(fileext = ".biom")
+write_hdf5_biom(xh, hdf5_out)
+
+xh2 <- read_biom(hdf5_out)
+# Count matrices are identical
+identical(biom_data(xh), biom_data(xh2))
+# Observation metadata (taxonomy) is preserved
+identical(observation_metadata(xh), observation_metadata(xh2))
+# Sample metadata is preserved
+identical(sample_metadata(xh), sample_metadata(xh2))
+```
+
+You can also convert an existing JSON/v1 biom object to HDF5 v2 format:
+
+```{r hdf5-convert, eval=hdf5_ok}
+json_to_hdf5 <- tempfile(fileext = ".biom")
+write_hdf5_biom(x4, json_to_hdf5)
+x4_hdf5 <- read_biom(json_to_hdf5)
+identical(biom_data(x4), biom_data(x4_hdf5))
+```
+
+
+# Tidy long-format output
+
+For downstream analysis with tidyverse tools it is often convenient to have
+the count data in *long format*: one row per (feature, sample) pair, with
+sample and observation metadata joined in automatically.
+
+`biomformat` provides two methods for this:
+
+* `as.data.frame(x)` — returns a plain `data.frame`  
+* `as_tibble.biom(x)` — returns a `tibble` (requires the
+  [tibble](https://tibble.tidyverse.org/) package)
+
+```{r tidy-dataframe}
+long_df <- as.data.frame(x4)
+head(long_df)
+dim(long_df)   # n_obs * n_samples rows, feature/sample/count + metadata cols
+```
+
+The result has one row per (feature × sample) pair.
+Columns always include `feature_id`, `sample_id`, and `count`.
+Any observation metadata (e.g. taxonomy) and sample metadata
+(e.g. body site, barcode) are joined in as additional columns:
+
+```{r tidy-colnames}
+names(long_df)
+```
+
+```{r tidy-tibble, eval=requireNamespace("tibble", quietly=TRUE)}
+library(tibble)
+long_tbl <- as_tibble.biom(x4)
+long_tbl
+```
+
+### purrr-style summarisation over samples
+
+With the long-format data frame in hand, standard
+[purrr](https://purrr.tidyverse.org/) + dplyr patterns work directly.
+The chunk below is guarded so it only runs when purrr is available,
+but the base-R equivalent (using `tapply` / `lapply`) is shown alongside
+each example for clarity.
+
+```{r purrr-available, include=FALSE}
+purrr_ok <- requireNamespace("purrr", quietly = TRUE) &&
+            requireNamespace("dplyr", quietly = TRUE)
+```
+
+```{r purrr-summary, eval=purrr_ok}
+library(purrr)
+library(dplyr)
+
+# Total counts per sample (purrr + dplyr)
+long_df |>
+  group_by(sample_id) |>
+  summarise(total_counts = sum(count), .groups = "drop") |>
+  arrange(desc(total_counts))
+```
+
+```{r purrr-map, eval=purrr_ok}
+# Per-sample Shannon diversity using purrr::map_dbl
+long_df |>
+  group_by(sample_id) |>
+  group_split() |>
+  purrr::map_dbl(function(df) {
+    p <- df$count / sum(df$count)
+    p <- p[p > 0]
+    -sum(p * log(p))
+  }) |>
+  setNames(unique(long_df$sample_id))
+```
+
+```{r tapply-fallback, eval=!purrr_ok}
+# Base-R equivalent when purrr is not available
+tapply(long_df$count, long_df$sample_id, function(counts) {
+  p <- counts / sum(counts)
+  p <- p[p > 0]
+  -sum(p * log(p))
+})
+```
+
+
+# SummarizedExperiment interoperability
+
+[SummarizedExperiment](https://bioconductor.org/packages/SummarizedExperiment)
+is the standard Bioconductor container for rectangular feature-by-sample assay
+data. `biomformat` provides two ways to coerce a `biom` object into a
+`SummarizedExperiment`:
+
+1. The explicit constructor `biom_to_SummarizedExperiment(x)`
+2. S4 coercion syntax `as(x, "SummarizedExperiment")`
+
+Both require the `SummarizedExperiment` and `S4Vectors` Bioconductor packages.
+
+```{r se-available, include=FALSE}
+se_ok <- requireNamespace("SummarizedExperiment", quietly = TRUE) &&
+         requireNamespace("S4Vectors",            quietly = TRUE)
+```
+
+```{r se-constructor, eval=se_ok}
+library(SummarizedExperiment)
+
+se <- biom_to_SummarizedExperiment(x4)
+se
+```
+
+The count matrix is stored in the `"counts"` assay slot, observation metadata
+goes to `rowData`, and sample metadata goes to `colData`:
+
+```{r se-slots, eval=se_ok}
+# Count matrix (same as biom_data(x4))
+head(assay(se, "counts"))
+
+# Sample metadata in colData
+colData(se)[, 1:3]
+
+# Observation (OTU) metadata in rowData
+rowData(se)[, 1:3]
+```
+
+The S4 `as()` coercion is equivalent:
+
+```{r se-as-coercion, eval=se_ok}
+se2 <- as(x4, "SummarizedExperiment")
+identical(assay(se, "counts"), assay(se2, "counts"))
+```
+
+From here the full Bioconductor ecosystem is available — for example,
+downstream use with `DESeq2`, `edgeR`, `limma`, etc.
+
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
