@@ -1,3 +1,27 @@
+CHANGES IN VERSION 1.39.11
+--------------------------
+
+BUG FIXES
+
+	- make_biom(): fix Issue #4 — NULL id was serialised as {} (empty JSON object)
+	  by jsonlite. make_biom() now substitutes "No Table ID" when id is NULL,
+	  matching the BIOM spec and ensuring write_biom() -> read_biom() is a
+	  lossless round-trip. validObject() now succeeds on the round-tripped object.
+
+	- make_biom(): fix Issue #6 — when observation_metadata (or sample_metadata)
+	  is a data.frame with list columns (e.g. a "taxonomy" column holding
+	  character vectors of rank assignments, as produced by dada2), the metadata
+	  was serialised as a bare JSON array ([[...]]) instead of a named JSON object
+	  ({"taxonomy":[...]}). The BIOM spec and downstream tools (phyloseq
+	  import_biom(), the Python biom library) require the named-object form.
+	  Root cause: as.matrix() on a list-column data.frame produces a list-matrix;
+	  as.list(row) then collapses field names. Fix: detect list-column data.frames
+	  and build per-row metadata directly as named lists, bypassing as.matrix().
+	  Closes GitHub Issue #6. Also resolves user-support Issue #9 (dada2 -> biom
+	  -> write_biom workflow now works correctly).
+
+	  R CMD check: 0 ERRORs, 0 NOTEs, 2 pre-existing vignette WARNINGs.
+
 CHANGES IN VERSION 1.39.10
 --------------------------
 

@@ -162,13 +162,28 @@ setMethod("biom", c("list"), function(x){
 #' identical(sample_metadata(x1), sample_metadata(y1))
 #' identical(biom_data(x1), biom_data(y1))
 make_biom <- function(data, sample_metadata=NULL, observation_metadata=NULL, id=NULL, matrix_element_type="int"){
+  # Issue #4 fix: NULL id serialises as {} with jsonlite; use "No Table ID" per the BIOM spec.
+  if (is.null(id)) id <- "No Table ID"
   # The observations / features / OTUs / rows "meta" data table
   if(!is.null(observation_metadata)){
-    # Build per-row named list using base R (replaces plyr::alply).
-    # Using obs_mat[i,] (not drop=FALSE) preserves column names in the list.
-    obs_mat  <- as.matrix(observation_metadata)
-    obs_rows <- lapply(seq_len(nrow(obs_mat)),
-                       function(i) as.list(obs_mat[i, ]))
+    # Issue #6 fix: when observation_metadata has list columns (e.g. a "taxonomy"
+    # column holding character vectors of rank assignments), as.matrix() would
+    # produce a list-matrix and the per-row metadata would be serialised as a
+    # bare JSON array instead of a named object.  Detect this case and build
+    # the per-row metadata directly from the data.frame without coercing to matrix.
+    if (any(sapply(as.data.frame(observation_metadata), is.list))) {
+      obs_df   <- as.data.frame(observation_metadata)
+      obs_rows <- lapply(seq_len(nrow(obs_df)), function(i) {
+        row_meta <- lapply(names(obs_df), function(col) obs_df[[col]][[i]])
+        names(row_meta) <- names(obs_df)
+        row_meta
+      })
+    } else {
+      # Non-list columns: original path via as.matrix() is correct.
+      obs_mat  <- as.matrix(observation_metadata)
+      obs_rows <- lapply(seq_len(nrow(obs_mat)),
+                         function(i) as.list(obs_mat[i, ]))
+    }
     rows = mapply(list, SIMPLIFY=FALSE, id=as.list(rownames(data)),
                   metadata=obs_rows)
   } else {
@@ -176,11 +191,19 @@ make_biom <- function(data, sample_metadata=NULL, observation_metadata=NULL, id=
   }
   # The samples / sites / columns "meta" data table
   if(!is.null(sample_metadata)){
-    # Build per-row named list using base R (replaces plyr::alply).
-    # Using smp_mat[i,] (not drop=FALSE) preserves column names in the list.
-    smp_mat  <- as.matrix(sample_metadata)
-    smp_rows <- lapply(seq_len(nrow(smp_mat)),
-                       function(i) as.list(smp_mat[i, ]))
+    # Same list-column awareness for sample_metadata.
+    if (any(sapply(as.data.frame(sample_metadata), is.list))) {
+      smp_df   <- as.data.frame(sample_metadata)
+      smp_rows <- lapply(seq_len(nrow(smp_df)), function(i) {
+        row_meta <- lapply(names(smp_df), function(col) smp_df[[col]][[i]])
+        names(row_meta) <- names(smp_df)
+        row_meta
+      })
+    } else {
+      smp_mat  <- as.matrix(sample_metadata)
+      smp_rows <- lapply(seq_len(nrow(smp_mat)),
+                         function(i) as.list(smp_mat[i, ]))
+    }
     columns = mapply(list, SIMPLIFY=FALSE, id=as.list(colnames(data)),
                      metadata=smp_rows)
   } else {
