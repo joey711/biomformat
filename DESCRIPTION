@@ -1,22 +1,23 @@
 Package: biomformat
-Version: 1.38.0
-Date: 2023-08-01
-Maintainer: Paul J. McMurdie <mcmurdie@alumni.stanford.edu>
+Version: 1.38.1
+Date: 2026-03-15
+Maintainer: Paul J. McMurdie <joey711@gmail.com>
 License: GPL-2
 Title: An interface package for the BIOM file format
 Type: Package
-Author: Paul J. McMurdie <mcmurdie@alumni.stanford.edu> and Joseph N Paulson <jpaulson@jimmy.harvard.edu>
+Author: Paul J. McMurdie <joey711@gmail.com> and Joseph N Paulson <jpaulson@jimmy.harvard.edu>
 BugReports: https://github.com/joey711/biomformat/issues
 URL: https://github.com/joey711/biomformat/, http://biom-format.org/
-Description: This is an R package for interfacing with the BIOM format. This package includes basic tools for reading biom-format files, accessing and
+Description: This is an R package for interfacing with the BIOM file format. This package includes basic tools for reading biom-format files, accessing and
                  subsetting data tables from a biom object (which is more complex than a single table), as well as limited support for writing a biom-object
                  back to a biom-format file. The design of this API is intended to match the python API and other tools included with the biom-format
                  project, but with a decidedly "R flavor" that should be familiar to R users. This includes S4 classes and methods, as well as extensions of
                  common core functions/methods.
-Imports: plyr (>= 1.8), jsonlite (>= 0.9.16), Matrix (>= 1.2), rhdf5
-Depends: R (>= 3.2), methods
-Suggests: testthat (>= 0.10), knitr (>= 1.10), BiocStyle (>= 1.6), rmarkdown (>= 0.7)
+Imports: jsonlite (>= 0.9.16), Matrix (>= 1.7-0)
+Depends: R (>= 4.1), methods
+Suggests: testthat (>= 0.10), knitr (>= 1.10), BiocStyle (>= 1.6), rmarkdown (>= 0.7), rhdf5
 VignetteBuilder: knitr
 Collate: 'allClasses.R' 'allPackage.R' 'IO-methods.R' 'BIOM-class.R' 'validity-methods.R'
 biocViews: ImmunoOncology, DataImport, Metagenomics, Microbiome
+Encoding: UTF-8
 NeedsCompilation: no

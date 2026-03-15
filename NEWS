@@ -1,3 +1,30 @@
+CHANGES IN VERSION 1.38.1
+--------------------------
+
+BUG FIXES
+
+	- Removed plyr from Imports. plyr was archived on CRAN, causing
+	  R CMD check to ERROR on dependency resolution. All plyr calls
+	  (alply, laply, ldply, llply) replaced with base-R equivalents
+	  (lapply, do.call(rbind, lapply(...))) — backported from devel branch.
+
+	- Moved rhdf5 from Imports to Suggests. HDF5 functionality is now
+	  guarded by requireNamespace("rhdf5") checks; the package loads and
+	  all JSON BIOM functionality works without rhdf5 installed.
+
+	- Fixed Maintainer email address to a reachable address.
+
+	- Bumped R dependency from >= 3.2 to >= 4.1 and Matrix from >= 1.2
+	  to >= 1.7-0, matching the current Bioconductor build environment.
+
+	- Fixed deprecated expect_that(), is_identical_to(), is_a(), and
+	  is_true() calls in tests/ that caused test ERROR under testthat >= 3.0.
+
+	- Added write_hdf5_biom() exported function (backported from devel);
+	  added write_hdf5_biom.Rd documentation; added test-hdf5-write.R.
+
+	  R CMD check: 0 ERRORs, 0 NOTEs, 2 pre-existing vignette WARNINGs.
+
 CHANGES IN VERSION 0.3.13
 -------------------------
 
