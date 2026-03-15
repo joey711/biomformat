@@ -3,10 +3,18 @@ CHANGES IN VERSION 1.39.15
 
 BUG FIXES
 
-	- Fixed Maintainer and Author email address to a reachable address
-	  (joey711@gmail.com) as requested by the Bioconductor team.
+	- Replaced deprecated Author:/Maintainer: DESCRIPTION fields with the
+	  modern Authors@R: format using person() with role=c("aut","cre") for
+	  the maintainer. This was flagged as an ERROR by BiocCheck >= 1.46 and
+	  was the root cause of the "invalid email" complaint from Bioconductor —
+	  the field itself was structurally invalid, not just the address string.
+	  Updated maintainer email to joey711@gmail.com (reachable address).
+	  Added .BiocCheck to .Rbuildignore.
 
 	  R CMD check: 0 ERRORs, 0 NOTEs, 2 pre-existing vignette WARNINGs.
+	  BiocCheck: 1 ERROR (Watched Tags on support site — manual web action),
+	             3 WARNINGs (version parity, no BioC deps, missing \value),
+	             14 NOTEs (style/cosmetic).
 
 CHANGES IN VERSION 1.39.14
 --------------------------
