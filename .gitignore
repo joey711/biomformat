@@ -3,3 +3,4 @@
 *.Rcheck/
 # Built tarballs
 *.tar.gz
+*.log
