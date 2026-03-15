@@ -1,3 +1,22 @@
+CHANGES IN VERSION 1.39.9
+-------------------------
+
+NEW FEATURES
+
+	- write_hdf5_biom(x, biom_file): new exported function that serialises a
+	  biom object to the BIOM v2 HDF5 format.  Writes both the sample-major
+	  and observation-major compressed-sparse representations required by the
+	  spec, plus all sample and observation metadata.  Requires rhdf5
+	  (Bioconductor); a clear error is raised if it is absent.
+	  read_biom() -> write_hdf5_biom() -> read_biom() is a lossless round-trip
+	  for both count data and metadata.
+
+BUG FIXES
+
+	- Moved rhdf5 from Imports to Suggests.  The package loads and all JSON
+	  BIOM functionality works without rhdf5 installed; HDF5 read/write simply
+	  stops with an informative message when rhdf5 is absent.
+
 CHANGES IN VERSION 1.39.8
 -------------------------
 

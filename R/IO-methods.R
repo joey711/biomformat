@@ -148,6 +148,144 @@ write_biom <- function(x, biom_file){
 	cat(toJSON(x, always_decimal=TRUE, auto_unbox=TRUE), file=biom_file)
 }
 ################################################################################
+#' Write a biom object to an HDF5 (BIOM v2) file.
+#'
+#' Serialises a \code{\link{biom-class}} object to the
+#' \href{http://biom-format.org/documentation/biom_format.html}{BIOM v2 HDF5 format}.
+#' Both the sample-major and observation-major compressed-sparse representations
+#' required by the spec are written, along with sample and observation metadata.
+#'
+#' The \code{rhdf5} package is required. If it is not installed a clear error
+#' is thrown.  In normal use you should prefer \code{\link{write_biom}} for
+#' JSON (BIOM v1) output; use this function only when HDF5 output is explicitly
+#' needed.
+#'
+#' @param x (Required). A \code{\link{biom-class}} object.
+#' @param biom_file (Required). Character string path to the output file.
+#'   Any existing file at that path is overwritten.
+#'
+#' @return \code{biom_file} (invisibly).
+#'
+#' @seealso
+#' \code{\link{read_hdf5_biom}}, \code{\link{write_biom}},
+#' \code{\link{biom-class}}, \code{\link{make_biom}}.
+#'
+#' @references \url{http://biom-format.org/}
+#'
+#' @export
+#' @importFrom utils packageVersion
+#' @examples
+#' biom_file <- system.file("extdata", "rich_sparse_otu_table.biom",
+#'                           package = "biomformat")
+#' x <- read_biom(biom_file)
+#' outfile <- tempfile(fileext = ".biom")
+#' write_hdf5_biom(x, outfile)
+#' y <- read_biom(outfile)
+#' identical(biom_data(x), biom_data(y))
+write_hdf5_biom <- function(x, biom_file) {
+  if (!requireNamespace("rhdf5", quietly = TRUE)) {
+    stop(
+      "The 'rhdf5' package is required to write HDF5/BIOM-v2 files.\n",
+      "Install it with: BiocManager::install(\"rhdf5\")"
+    )
+  }
+
+  # -- Extract the count matrix as a plain base R matrix --
+  mat    <- as.matrix(biom_data(x))
+  n_obs  <- nrow(mat)
+  n_samp <- ncol(mat)
+
+  # -- Build sample-major CCS (outer = samples = columns) --
+  # Iterate columns; collect (obs_idx, val) pairs in column order.
+  # Indices within each column are kept in ascending row order because
+  # Matrix::sparseMatrix / which() already returns them sorted.
+  s_indptr  <- integer(n_samp + 1L)
+  s_indices <- integer(0)
+  s_data    <- numeric(0)
+  for (j in seq_len(n_samp)) {
+    nz <- which(mat[, j] != 0)
+    s_indptr[j + 1L] <- s_indptr[j] + length(nz)
+    s_indices <- c(s_indices, nz - 1L)   # 0-based
+    s_data    <- c(s_data,    mat[nz, j])
+  }
+
+  # -- Build observation-major CSR (outer = obs = rows) --
+  o_indptr  <- integer(n_obs + 1L)
+  o_indices <- integer(0)
+  o_data    <- numeric(0)
+  for (i in seq_len(n_obs)) {
+    nz <- which(mat[i, ] != 0)
+    o_indptr[i + 1L] <- o_indptr[i] + length(nz)
+    o_indices <- c(o_indices, nz - 1L)   # 0-based
+    o_data    <- c(o_data,    mat[i, nz])
+  }
+
+  # -- Create HDF5 file and group hierarchy --
+  if (file.exists(biom_file)) file.remove(biom_file)
+  rhdf5::h5createFile(biom_file)
+  for (grp in c("observation", "observation/matrix",
+                "sample",      "sample/matrix")) {
+    rhdf5::h5createGroup(biom_file, grp)
+  }
+
+  # -- Write matrix datasets --
+  rhdf5::h5write(rownames(mat),     biom_file, "observation/ids")
+  rhdf5::h5write(o_indptr,          biom_file, "observation/matrix/indptr")
+  rhdf5::h5write(o_indices,         biom_file, "observation/matrix/indices")
+  rhdf5::h5write(as.numeric(o_data),biom_file, "observation/matrix/data")
+
+  rhdf5::h5write(colnames(mat),     biom_file, "sample/ids")
+  rhdf5::h5write(s_indptr,          biom_file, "sample/matrix/indptr")
+  rhdf5::h5write(s_indices,         biom_file, "sample/matrix/indices")
+  rhdf5::h5write(as.numeric(s_data),biom_file, "sample/matrix/data")
+
+  # -- Write metadata --
+  # Access raw per-element metadata directly from x$rows / x$columns to
+  # preserve the original data structure (e.g. vector-valued taxonomy).
+  # Each named metadata field is written as a dataset under the group:
+  #   vector fields  -> 1-D array of length n_obs / n_samp
+  #   list/vector    -> 2-D matrix [n_levels x n_obs/n_samp]  (taxonomy style)
+  write_meta_group <- function(elements, group, n_elem) {
+    first_meta <- elements[[1L]]$metadata
+    if (is.null(first_meta) || length(first_meta) == 0L) return(invisible(NULL))
+    rhdf5::h5createGroup(biom_file, paste0(group, "/metadata"))
+    for (field in names(first_meta)) {
+      vals <- lapply(elements, function(e) e$metadata[[field]])
+      # Scalar per element -> write as 1-D character/numeric array
+      if (all(lengths(vals) == 1L)) {
+        rhdf5::h5write(unlist(vals), biom_file,
+                       paste0(group, "/metadata/", field))
+      } else {
+        # Vector per element (e.g. taxonomy) -> write as [n_levels x n_elem] matrix
+        mat_meta <- do.call(cbind, lapply(vals, as.character))
+        rhdf5::h5write(mat_meta, biom_file,
+                       paste0(group, "/metadata/", field))
+      }
+    }
+    invisible(NULL)
+  }
+
+  write_meta_group(x$rows,    "observation", n_obs)
+  write_meta_group(x$columns, "sample",      n_samp)
+
+  # -- Write top-level HDF5 attributes --
+  fid <- rhdf5::H5Fopen(biom_file)
+  on.exit(rhdf5::H5Fclose(fid), add = TRUE)
+  rhdf5::h5writeAttribute(
+    as.character(if (is.null(x$id)) "No Table ID" else x$id),
+    fid, "id")
+  rhdf5::h5writeAttribute("http://biom-format.org",      fid, "format-url")
+  rhdf5::h5writeAttribute(c(2L, 1L),                     fid, "format-version")
+  rhdf5::h5writeAttribute(
+    paste0("biomformat ", packageVersion("biomformat")),  fid, "generated-by")
+  rhdf5::h5writeAttribute(as.character(Sys.time()),       fid, "creation-date")
+  rhdf5::h5writeAttribute("OTU table",                    fid, "type")
+  rhdf5::h5writeAttribute(as.integer(length(s_data)),     fid, "nnz")
+  rhdf5::h5writeAttribute(as.integer(c(n_obs, n_samp)),   fid, "shape")
+
+  invisible(biom_file)
+}
+################################################################################
 #' Read in a biom-format v2 (HDF5) file, returning a \code{list}.
 #'
 #' This function reads a BIOM v2 HDF5 file directly. In normal use, you should
@@ -161,14 +299,14 @@ write_biom <- function(x, biom_file){
 #'
 #' @param biom_file (Required). A character string path to an HDF5-format
 #'  BIOM file.
-#'  
+#'
 #' @return A named list representing the BIOM data, suitable for passing to
 #'  \code{\link{biom}()}.
 #'
-#' @seealso 
-#' 
+#' @seealso
 #' \code{\link{read_biom}}, \code{\link{make_biom}},
-#' \code{\link{biom-class}}, \code{\link{write_biom}}.
+#' \code{\link{biom-class}}, \code{\link{write_biom}},
+#' \code{\link{write_hdf5_biom}}.
 #'
 #' @references \url{http://biom-format.org/}
 #'

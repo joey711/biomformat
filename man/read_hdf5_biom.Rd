@@ -41,5 +41,6 @@ identical(biom_data(x), biom_data(y))
 }
 \seealso{
 \code{\link{read_biom}}, \code{\link{make_biom}},
-\code{\link{biom-class}}, \code{\link{write_biom}}.
+\code{\link{biom-class}}, \code{\link{write_biom}},
+\code{\link{write_hdf5_biom}}.
 }
