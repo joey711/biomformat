@@ -1,3 +1,17 @@
+CHANGES IN VERSION 1.39.8
+-------------------------
+
+BUG FIXES / PERFORMANCE
+
+	- generate_matrix(): rewrote HDF5/BIOM-v2 matrix reconstruction to build
+	  a sparse Matrix directly from the CCS (indptr/indices/data) triplets
+	  stored in the HDF5 file, instead of first constructing a dense
+	  base::matrix via sapply() and then converting.  For large datasets this
+	  avoids an O(n_obs * n_samples) allocation.  The return value (list of
+	  named vectors, one per observation) is unchanged so all downstream code
+	  is unaffected.  Also handles the edge case of an all-zero matrix
+	  (length(data) == 0) explicitly.
+
 CHANGES IN VERSION 1.39.7
 -------------------------
 

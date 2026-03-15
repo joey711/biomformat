@@ -789,26 +789,52 @@ extract_metadata = function(x, indextype, indices, parallel=FALSE){
 	return(metadata)
 }
 ################################################################################
-# Generic internal function for generating the count matrix.
+# Generic internal function for generating the count matrix from HDF5/BIOM-v2.
+#
+# HDF5 BIOM v2 stores the matrix in CCS (compressed column storage) order
+# where the "columns" are samples:
+#   indptr  -- length n_samples + 1; indptr[j]:(indptr[j+1]-1) gives the
+#              positions in indices/data for sample j  (0-based)
+#   indices -- obs (row) indices for each non-zero value  (0-based)
+#   data    -- non-zero values
+#
+# We convert directly to (i, j, x) triplets and build a sparse Matrix,
+# avoiding the intermediate dense base::matrix that the original sapply
+# approach required.  The return value is the list-of-named-vectors format
+# that biom() / read_hdf5_biom() expect.
+#
+#' @importFrom Matrix sparseMatrix
 #' @keywords internal
 generate_matrix <- function(x){
-  indptr  = x$sample$matrix$indptr+1
-  indices = x$sample$matrix$indices+1
-  data    = x$sample$matrix$data
-  nr = length(x$observation$ids)
- 
-  counts = sapply(2:length(indptr),function(i){
-    x = rep(0,nr)
-    seq = indptr[i-1]:(indptr[i]-1)
-    x[indices[seq]] = data[seq]
-    x
-    })
-  rownames(counts) = x$observation$ids
-  colnames(counts) = x$sample$ids
-  # I wish this next line wasn't necessary
-  lapply(1:nrow(counts),function(i){
-    counts[i,]
-    })
+  # rhdf5::h5read() returns HDF5 datasets as R 'array' objects, which
+  # sparseMatrix() does not accept directly for its i/j/x arguments.
+  # Coerce everything to plain atomic vectors before use.
+  indptr  <- as.integer(x$sample$matrix$indptr)   # 0-based, length n_samples+1
+  indices <- as.integer(x$sample$matrix$indices)  # 0-based obs indices
+  vals    <- as.numeric(x$sample$matrix$data)
+  n_obs   <- length(x$observation$ids)
+  n_samp  <- length(x$sample$ids)
+
+  # Build (i, j) index vectors from the CCS indptr.
+  # diff(indptr) gives nnz per sample column; rep() expands to a j vector.
+  j_vec <- rep(seq_len(n_samp), diff(indptr))   # 1-based sample (column) indices
+  i_vec <- indices + 1L                          # 1-based obs (row) indices
+
+  if (length(vals) == 0L) {
+    # All-zero matrix (no non-zero entries)
+    counts <- Matrix::sparseMatrix(i = integer(0), j = integer(0),
+                                   x = numeric(0),
+                                   dims = c(n_obs, n_samp))
+  } else {
+    counts <- Matrix::sparseMatrix(i = i_vec, j = j_vec, x = vals,
+                                   dims = c(n_obs, n_samp))
+  }
+  rownames(counts) <- x$observation$ids
+  colnames(counts) <- x$sample$ids
+
+  # Return as list-of-named-vectors (one element per obs row) so that the
+  # downstream biom() constructor and biom_data() dense path work unchanged.
+  lapply(seq_len(nrow(counts)), function(i) as.vector(counts[i, , drop = FALSE]))
 }
 ################################################################################
 # Generic internal function for generating the metadata.
