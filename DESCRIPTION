@@ -1,12 +1,12 @@
 Package: biomformat
-Version: 1.38.2
+Version: 1.38.3
 Date: 2026-03-15
 Authors@R: c(
     person("Paul J.", "McMurdie",
            email = "joey711@gmail.com",
            role = c("aut", "cre")),
     person("Joseph N.", "Paulson",
-           email = "jpaulson@jimmy.harvard.edu",
+           email = "joseph.paulson@yale.edu",
            role = "aut"))
 License: GPL-2
 Title: An interface package for the BIOM file format
