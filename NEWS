@@ -1,3 +1,23 @@
+CHANGES IN VERSION 1.39.7
+-------------------------
+
+NEW FEATURES
+
+	- as.data.frame.biom(): new S3 method that converts a biom object to a
+	  long-format (tidy) data.frame with one row per (feature, sample) pair.
+	  Columns: feature_id, sample_id, count, plus any sample and observation
+	  metadata columns appended via left-join. Pure base R, no tidyverse
+	  dependency.
+
+	- as_tibble.biom(): thin wrapper around as.data.frame.biom() that returns
+	  a tibble. Requires the 'tibble' package (Suggests only). Call via
+	  tibble::as_tibble(x) or as_tibble.biom(x) directly.
+
+DEPENDENCY CHANGES
+
+	- Added tibble to Suggests (optional; only needed for as_tibble.biom()).
+
+
 CHANGES IN VERSION 1.39.6
 -------------------------
 
