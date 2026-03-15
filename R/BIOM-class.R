@@ -131,6 +131,7 @@ setMethod("biom", c("list"), function(x){
 #' \code{\link{read_biom}} 
 #'
 #' @export
+#' @importFrom utils packageVersion
 #'
 #' @examples
 #' # import with default parameters, specify a file
@@ -218,7 +219,7 @@ make_biom <- function(data, sample_metadata=NULL, observation_metadata=NULL, id=
 #' @param object biom-class object
 #' 
 #' @export
-#' 
+#' @importFrom methods show
 #' @rdname show-methods
 #' 
 #' @examples
@@ -270,6 +271,7 @@ setMethod("header", c("biom"), function(x){
 #' \code{\link{biom-class}}
 #' 
 #' @export
+#' @importFrom methods as
 #' @docType methods
 #' @rdname biom_shape-methods
 #' @examples
@@ -824,6 +826,7 @@ generate_metadata <- function(x){
 }
 ################################################################################
 # Generic internal function for generating a named list. 
+#' @importFrom stats setNames
 #' @keywords internal
 namedList <- function(...) {
     L <- list(...)

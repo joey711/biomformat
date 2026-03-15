@@ -33,6 +33,7 @@
 #' @name biom-class
 #' @rdname biom-class
 #' @exportClass biom
+#' @importFrom methods setClass new is
 #'
 #' @examples 
 #' biom_file = system.file("extdata", "rich_sparse_otu_table.biom", package = "biomformat")

@@ -20,4 +20,6 @@ Suggests: testthat (>= 0.10), knitr (>= 1.10), BiocStyle (>= 1.6), rmarkdown (>=
 VignetteBuilder: knitr
 Collate: 'allClasses.R' 'allPackage.R' 'IO-methods.R' 'BIOM-class.R' 'SE-methods.R' 'tidy-methods.R' 'validity-methods.R'
 biocViews: ImmunoOncology, DataImport, Metagenomics, Microbiome
+Encoding: UTF-8
 NeedsCompilation: no
+RoxygenNote: 7.3.3

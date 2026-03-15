@@ -111,5 +111,8 @@ validbiom = function(object){
 }
 ################################################################################
 ## assign the function as the validity method for the biom-class
+#' @importFrom methods setValidity validObject
+#' @keywords internal
+NULL
 setValidity("biom", validbiom)
 ################################################################################
