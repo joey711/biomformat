@@ -1,3 +1,34 @@
+CHANGES IN VERSION 1.39.6
+-------------------------
+
+NEW FEATURES
+
+	- biom_to_SummarizedExperiment(): new exported function that converts a
+	  biom object into a SummarizedExperiment, placing the count/value matrix
+	  in assay("counts"), sample metadata in colData(), and feature metadata
+	  in rowData(). Both colData and rowData are S4Vectors::DataFrame objects.
+	  When a biom object carries no metadata (the accessor returns NULL), an
+	  empty DataFrame with correct row/col names is used, ensuring the SE is
+	  always valid. No hard dependency is introduced: SummarizedExperiment and
+	  S4Vectors are listed in Suggests only.
+
+	- as(x, "SummarizedExperiment"): S4 coercion method registered at load
+	  time when SummarizedExperiment is available, delegating to
+	  biom_to_SummarizedExperiment().
+
+DEPENDENCY CHANGES
+
+	- Added SummarizedExperiment and S4Vectors to Suggests.
+
+TESTS
+
+	- New tests/testthat/test-SE.R with 6 tests covering: return class,
+	  assay content, colData content, rowData content, S4 coercion, NULL
+	  metadata, and SE dimension/dimname correctness.
+	  All tests are skipped gracefully when SummarizedExperiment is not
+	  installed.
+
+
 CHANGES IN VERSION 1.39.5
 -------------------------
 

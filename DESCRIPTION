@@ -1,5 +1,5 @@
 Package: biomformat
-Version: 1.39.5
+Version: 1.39.6
 Date: 2026-03-14
 Maintainer: Paul J. McMurdie <mcmurdie@alumni.stanford.edu>
 License: GPL-2
@@ -15,8 +15,9 @@ Description: This is an R package for interfacing with the BIOM format. This pac
                  common core functions/methods.
 Imports: jsonlite (>= 0.9.16), Matrix (>= 1.7-0), rhdf5
 Depends: R (>= 4.1), methods
-Suggests: testthat (>= 0.10), knitr (>= 1.10), BiocStyle (>= 1.6), rmarkdown (>= 0.7)
+Suggests: testthat (>= 0.10), knitr (>= 1.10), BiocStyle (>= 1.6), rmarkdown (>= 0.7),
+    SummarizedExperiment, S4Vectors
 VignetteBuilder: knitr
-Collate: 'allClasses.R' 'allPackage.R' 'IO-methods.R' 'BIOM-class.R' 'validity-methods.R'
+Collate: 'allClasses.R' 'allPackage.R' 'IO-methods.R' 'BIOM-class.R' 'SE-methods.R' 'validity-methods.R'
 biocViews: ImmunoOncology, DataImport, Metagenomics, Microbiome
 NeedsCompilation: no
