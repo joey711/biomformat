@@ -23,6 +23,15 @@ Nothing. The first argument, \code{x}, is written to a file.
 \description{
 Write a biom-format v1 file, returning a \code{biom-class}.
 }
+\details{
+\code{write_biom()} serialises the entire BIOM object to a single JSON
+string via \code{\link[jsonlite]{toJSON}}.  Because R character strings are
+limited to \eqn{2^{31}-1} bytes, this function will fail with a
+\emph{"character strings are limited to 2^31-1 bytes"} error for very
+large datasets.  If your dataset has more than a few thousand samples or
+features, use \code{\link{write_hdf5_biom}} instead — the HDF5 format has
+no such size constraint.
+}
 \examples{
 biom_file <- system.file("extdata", "rich_sparse_otu_table.biom", package = "biomformat")
 x = read_biom(biom_file)

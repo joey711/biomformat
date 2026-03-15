@@ -119,6 +119,14 @@ read_biom <- function(biom_file){
 #'  The format is formally defined at 
 #'  \href{http://biom-format.org/documentation/biom_format.html}{the biom-format definition}
 #'
+#' @details
+#' \code{write_biom()} serialises the entire BIOM object to a single JSON
+#' string via \code{\link[jsonlite]{toJSON}}.  Because R character strings are
+#' limited to \eqn{2^{31}-1} bytes, this function will fail with a
+#' \emph{"character strings are limited to 2^31-1 bytes"} error for very
+#' large datasets.  If your dataset has more than a few thousand samples or
+#' features, use \code{\link{write_hdf5_biom}} instead — the HDF5 format has
+#' no such size constraint.
 #' @return Nothing. The first argument, \code{x}, is written to a file.
 #'
 #' @seealso 

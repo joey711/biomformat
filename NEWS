@@ -1,3 +1,17 @@
+CHANGES IN VERSION 1.39.13
+--------------------------
+
+DOCUMENTATION
+
+	- write_biom(): added @details section documenting the 2^31-1 byte
+	  size limitation that arises because jsonlite serialises the entire
+	  BIOM object to a single R character string. Users with large datasets
+	  (thousands of samples or features) are now explicitly directed to
+	  write_hdf5_biom() which has no such size constraint.
+	  Closes GitHub Issue #8.
+
+	  R CMD check: 0 ERRORs, 0 NOTEs, 2 pre-existing vignette WARNINGs.
+
 CHANGES IN VERSION 1.39.12
 --------------------------
 
