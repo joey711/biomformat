@@ -85,3 +85,61 @@ test_that("missing rhdf5 gives a clear error", {
     )
   })
 })
+
+################################################################################
+# Tests for Issue #7: zero-count sample column in HDF5 BIOM
+################################################################################
+
+test_that("zero-column HDF5 fixture: biom_data() returns correct 3x3 matrix", {
+  skip_if_not_installed("rhdf5")
+  zero_file <- system.file("extdata", "zero_col_hdf5.biom", package = "biomformat")
+  skip_if(nchar(zero_file) == 0, "zero_col_hdf5.biom fixture not found")
+  x <- read_biom(zero_file)
+  m <- as.matrix(biom_data(x))
+
+  # Dimensions
+  expect_equal(dim(m), c(3L, 3L))
+
+  # Row and column names
+  expect_equal(rownames(m), c("OTU1", "OTU2", "OTU3"))
+  expect_equal(colnames(m), c("Samp1", "ZeroSamp", "Samp3"))
+
+  # ZeroSamp column (column 2) must be all zeros
+  expect_true(all(m[, "ZeroSamp"] == 0),
+              info = "ZeroSamp column should be entirely zero")
+
+  # Samp1 column: expected values 1, 3, 5
+  expect_equal(as.numeric(m[, "Samp1"]), c(1, 3, 5))
+
+  # Samp3 column: expected values 2, 4, 6
+  expect_equal(as.numeric(m[, "Samp3"]), c(2, 4, 6))
+})
+
+test_that("zero-column HDF5 fixture: make_biom() + write_hdf5_biom() round-trip", {
+  skip_if_not_installed("rhdf5")
+  zero_file <- system.file("extdata", "zero_col_hdf5.biom", package = "biomformat")
+  skip_if(nchar(zero_file) == 0, "zero_col_hdf5.biom fixture not found")
+
+  x <- read_biom(zero_file)
+  m_orig <- as.matrix(biom_data(x))
+
+  # Round-trip: write to HDF5, read back
+  outf <- tempfile(fileext = ".biom")
+  write_hdf5_biom(x, outf)
+  y <- read_biom(outf)
+  m_rt <- as.matrix(biom_data(y))
+
+  # Dimensions preserved
+  expect_equal(dim(m_rt), c(3L, 3L))
+
+  # Names preserved
+  expect_equal(rownames(m_rt), rownames(m_orig))
+  expect_equal(colnames(m_rt), colnames(m_orig))
+
+  # ZeroSamp column still all zeros after round-trip
+  expect_true(all(m_rt[, "ZeroSamp"] == 0),
+              info = "ZeroSamp column should remain all-zero after HDF5 round-trip")
+
+  # Full matrix equality
+  expect_equal(m_rt, m_orig)
+})
