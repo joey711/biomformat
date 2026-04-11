@@ -3,4 +3,5 @@
 *.Rcheck/
 # Built tarballs
 *.tar.gz
+/biomformat.BiocCheck
 *.log

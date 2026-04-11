@@ -522,6 +522,12 @@ setMethod("biom_data", c("biom", "missing", "missing"), function(x, rows, column
   biom_data(x, 1:nrow(x), 1:ncol(x), parallel)
 })
 #' @rdname biom_data-methods
+setMethod("biom_data", c("biom", "character", "missing"), function(x, rows, columns, parallel){
+  rows = which(rownames(x) %in% rows)
+  # Dispatch with specified numeric rows and all cols
+  biom_data(x, rows, 1:ncol(x), parallel)
+})
+#' @rdname biom_data-methods
 setMethod("biom_data", c("biom", "character", "ANY"), function(x, rows, columns, parallel){
   rows = which(rownames(x) %in% rows)
   # Dispatch with specified numeric rows and pass cols

@@ -3,6 +3,7 @@
 \name{biom_data}
 \alias{biom_data}
 \alias{biom_data,biom,missing,missing-method}
+\alias{biom_data,biom,character,missing-method}
 \alias{biom_data,biom,character,ANY-method}
 \alias{biom_data,biom,ANY,character-method}
 \alias{biom_data,biom,numeric,missing-method}
@@ -13,6 +14,8 @@
 biom_data(x, rows, columns, parallel = FALSE)
 
 \S4method{biom_data}{biom,missing,missing}(x, rows, columns, parallel = FALSE)
+
+\S4method{biom_data}{biom,character,missing}(x, rows, columns, parallel = FALSE)
 
 \S4method{biom_data}{biom,character,ANY}(x, rows, columns, parallel = FALSE)
 
